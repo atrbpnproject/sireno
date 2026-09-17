@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Aplikasi Daftar Nominatif Pencairan Layanan Pertanahan</title>
+  <title>SI RENO — Sistem Informasi Rekapitulasi dan Nominatif</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.min.js"></script>
   <style>
     :root {
@@ -168,6 +168,23 @@
       display: block;
       font-size: 24px;
       color: var(--navy);
+    }
+
+    .insight-card {
+      min-height: 104px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .insight-card small {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 600;
+      overflow-wrap: anywhere;
     }
 
     table {
@@ -483,8 +500,10 @@
     .month-recap-item strong { display:block; margin-bottom:4px; color:#173f64; font-size:12px; }
     .month-recap-item span { display:block; color:#62778b; font-size:11px; line-height:1.55; }
     .detail-tools { display:flex; align-items:center; gap:9px; margin:0 0 12px; }
-    .detail-actionbar { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 22px; border-bottom:1px solid #dce5ee; background:#fff; }
-    .detail-actionbar .actions { margin:0; flex-wrap:nowrap; }
+    .detail-actionbar { position:relative; z-index:30; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 22px; border-bottom:1px solid #dce5ee; background:#fff; }
+    .detail-actionbar .actions { position:relative; z-index:31; margin:0; flex-wrap:nowrap; }
+    .detail-actionbar .split-download { z-index:32; }
+    .detail-body { position:relative; z-index:1; }
     .detail-tools input,.detail-tools select { margin:0; padding:9px 11px; min-height:38px; }
     .detail-tools input { flex:1 1 360px; width:auto; min-width:260px; }
     .detail-tools select { flex:0 0 190px; width:190px; }
@@ -534,7 +553,148 @@
         align-items: stretch;
       }
     }
-  </style>
+  
+    /* SI RENO v8 — Rekapitulasi sebagai halaman utama */
+    .si-reno-tabs {
+      display:flex;
+      gap:8px;
+      margin:0 0 18px;
+      padding:5px;
+      background:#f3f7fb;
+      border:1px solid #dbe6f1;
+      border-radius:12px;
+    }
+    .si-reno-tab {
+      flex:0 0 auto;
+      border:0;
+      background:transparent;
+      color:#315b82;
+      font-weight:700;
+      padding:11px 22px;
+      border-radius:9px;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+    .si-reno-tab:hover { background:#e7f0f8; }
+    .si-reno-tab.active {
+      background:#1f67ad;
+      color:#fff;
+      box-shadow:0 2px 7px rgba(31,103,173,.18);
+    }
+    .si-reno-tab-panel.hidden { display:none; }
+    .si-reno-welcome {
+      padding:4px 0 2px;
+    }
+    .si-reno-welcome h2 { margin-bottom:5px; }
+    .si-reno-welcome p { margin-top:0; }
+    .upload-zone.large {
+      min-height:150px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+    }
+    .upload-zone.large .upload-copy {
+      align-items:center;
+    }
+    .upload-zone.large .upload-copy strong {
+      font-size:16px;
+    }
+    .officer-panel {
+      margin:0 0 18px;
+      padding:16px;
+      border:1px solid #dbe6f1;
+      border-radius:12px;
+      background:#f8fbfe;
+    }
+    .officer-panel h3 {
+      margin:0 0 5px;
+      color:#163f68;
+      font-size:16px;
+    }
+    .officer-panel > p {
+      margin:0 0 14px;
+      color:#5d7690;
+      font-size:13px;
+    }
+    .recap-headline {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:15px;
+      margin-bottom:14px;
+    }
+    .recap-headline h3 { margin:0 0 4px; color:#163f68; }
+    .recap-headline p { margin:0; }
+    .recap-period {
+      white-space:nowrap;
+      padding:8px 12px;
+      border:1px solid #d5e2ee;
+      border-radius:9px;
+      background:#f7fafc;
+      color:#476987;
+      font-size:12px;
+      font-weight:700;
+    }
+    .recap-table-wrap {
+      overflow:auto;
+      border:1px solid #dbe6f1;
+      border-radius:10px;
+    }
+    .recap-table {
+      width:100%;
+      min-width:760px;
+      border-collapse:collapse;
+    }
+    .recap-table th,
+    .recap-table td {
+      padding:10px 11px;
+      border-bottom:1px solid #e5edf4;
+      vertical-align:middle;
+    }
+    .recap-table th {
+      background:#f3f7fb;
+      color:#315b82;
+      font-size:12px;
+      text-align:center;
+      white-space:nowrap;
+    }
+    .recap-table th:nth-child(2),
+    .recap-table td:nth-child(2),
+    .recap-table td.status-number {
+      text-align:center;
+    }
+    .recap-table td:first-child {
+      min-width:310px;
+    }
+    .recap-table .grand-total td {
+      font-weight:800;
+      background:#f4f8fc;
+      border-top:2px solid #cbdbe9;
+    }
+    .recap-month-filter {
+      margin:0 0 16px;
+      padding:12px 14px;
+      border:1px solid #dbe6f1;
+      border-radius:10px;
+      background:#f8fbfe;
+    }
+    .recap-month-filter .month-filter { margin-top:8px; }
+    .recap-note {
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:9px;
+      background:#f8fbfe;
+      color:#607990;
+      font-size:12px;
+    }
+    @media (max-width:700px) {
+      .si-reno-tabs { overflow-x:auto; }
+      .si-reno-tab { flex:1 0 auto; }
+      .recap-headline { align-items:flex-start; flex-direction:column; }
+    }
+
+</style>
 </head>
 <body>
   <header>
@@ -549,108 +709,137 @@
           </svg>
         </div>
         <div>
-          <p class="brand-kicker">DASHBOARD LAYANAN PERTANAHAN</p>
-          <h1>Aplikasi Daftar Nominatif Pencairan</h1>
-          <p class="brand-subtitle">Rekap MAK, monitoring berkas tahun berjalan, dan backlog tahun sebelumnya</p>
+          <h1>SI RENO</h1>
+          <p class="brand-subtitle">Sistem Informasi Rekapitulasi dan Nominatif</p>
         </div>
       </div>
-      <button id="appVersionBtn" class="version-badge" type="button" aria-haspopup="dialog">Versi 6.0</button>
+      <button id="appVersionBtn" class="version-badge" type="button" aria-haspopup="dialog">Versi 8.11</button>
     </div>
   </header>
 
   <main>
     <section class="panel" id="inputPanel">
-      <div class="panel-heading">
-        <div><h2>Siapkan Data Pencairan</h2><p>Lengkapi identitas penanda tangan, lalu unggah Excel sumber untuk dianalisis.</p></div>
-        <span class="step-badge">LANGKAH 1</span>
-      </div>
-      <div class="grid">
-        <div>
-          <label for="kasiName">Nama Penanda Tangan</label>
-          <input id="kasiName" type="text" placeholder="Kosongkan jika belum diketahui">
-        </div>
-        <div>
-          <label for="kasiNip">NIP Penanda Tangan</label>
-          <input id="kasiNip" type="text" placeholder="Kosongkan jika belum diketahui">
-        </div>
-        <div>
-          <label for="positionTemplate">Jabatan Penanda Tangan</label>
-          <select id="positionTemplate">
-            <option value="">Pilih jabatan Kantor Pertanahan</option>
-            <option value="Kepala Subbagian Tata Usaha">Kepala Subbagian Tata Usaha</option>
-            <option value="Kepala Seksi Survei dan Pemetaan">Kepala Seksi Survei dan Pemetaan</option>
-            <option value="Kepala Seksi Penetapan Hak dan Pendaftaran">Kepala Seksi Penetapan Hak dan Pendaftaran</option>
-            <option value="Kepala Seksi Penataan dan Pemberdayaan">Kepala Seksi Penataan dan Pemberdayaan</option>
-            <option value="Kepala Seksi Pengadaan Tanah dan Pengembangan">Kepala Seksi Pengadaan Tanah dan Pengembangan</option>
-            <option value="Kepala Seksi Pengendalian dan Penanganan Sengketa">Kepala Seksi Pengendalian dan Penanganan Sengketa</option>
-            <option value="__manual__">Isi jabatan secara manual</option>
-          </select>
-          <input id="kasiPosition" type="text" placeholder="Ketik jabatan penanda tangan" aria-label="Jabatan penanda tangan manual" hidden style="margin-top:8px;">
-        </div>
-        <div>
-          <label for="excelFile">Upload file Excel DI305, DI301A, atau DI208</label>
-          <div id="uploadZone" class="upload-zone">
-            <div class="upload-icon">⇧</div>
-            <div class="upload-copy"><strong>Klik atau tarik file Excel ke sini</strong><span id="fileNameText">Format .xlsx atau .xls</span></div>
-            <input id="excelFile" type="file" accept=".xlsx,.xls">
+      <div class="si-reno-welcome">
+        <div class="panel-heading">
+          <div>
+            <h2>Mulai Rekapitulasi</h2>
+            <p>Unggah file Excel layanan sesuai DI yang tersedia. SI RENO akan membaca seluruh data dan menampilkan rekapitulasi layanan secara otomatis.</p>
           </div>
+          <span class="step-badge">LANGKAH 1</span>
+        </div>
+      </div>
+
+      <div>
+        <label for="excelFile">File Excel Sumber</label>
+        <div id="uploadZone" class="upload-zone large">
+          <div class="upload-icon">⇧</div>
+          <div class="upload-copy">
+            <strong>Klik atau tarik &amp; lepaskan file Excel di sini</strong>
+            <span id="fileNameText">Mendukung DI305, DI301A, atau DI208 · Format .xlsx atau .xls</span>
+          </div>
+          <input id="excelFile" type="file" accept=".xlsx,.xls">
         </div>
       </div>
 
       <div class="actions-toolbar">
         <div class="actions">
-          <button id="processBtn" class="primary" type="button">Proses &amp; Analisis</button>
-          <button id="downloadBtn" class="secondary" type="button" disabled>Download Excel</button>
-          <button id="downloadCustomBtn" class="secondary" type="button" disabled>Download MAK Custom</button>
+          <button id="processBtn" class="primary hidden" type="button" aria-hidden="true" tabindex="-1">Proses &amp; Rekapitulasi</button>
         </div>
-        <span class="small">Data diproses lokal di browser dan tidak dikirim ke server.</span>
+        <span class="small">Setelah file dipilih atau dilepas, SI RENO langsung menganalisis data secara otomatis. Data diproses lokal di browser dan tidak dikirim ke server.</span>
       </div>
       <div id="message" class="message"></div>
-      <p class="small">Aplikasi mengenali variasi nama kolom DI305, DI301A, dan DI208. Minimal tersedia kolom nama pemohon/pihak dan jenis permohonan/layanan/kegiatan.</p>
+      <p class="small">SI RENO mengenali variasi nama kolom DI305, DI301A, dan DI208. Minimal tersedia kolom nama pemohon/pihak dan jenis permohonan/layanan/kegiatan.</p>
     </section>
 
     <section id="preview" class="panel hidden">
       <div class="panel-heading">
-        <div><h2>Dashboard Hasil Analisis</h2><p>Klik angka pada kartu atau tabel untuk membuka rincian data.</p></div>
+        <div>
+          <h2>Hasil SI RENO</h2>
+          <p>Rekapitulasi menjadi tampilan utama. Pindah ke tab Nominatif jika ingin menyiapkan daftar nominatif pencairan.</p>
+        </div>
         <span class="step-badge">LANGKAH 2</span>
       </div>
-      <div class="quick-nav">
-        <button type="button" data-scroll-target="currentYearSection">Tahun Berjalan</button>
-        <button type="button" data-scroll-target="previousYearSection">Tahun Sebelumnya</button>
-        <button type="button" data-scroll-target="unclassifiedDetails">Tidak Terklasifikasi</button>
-        <button type="button" data-scroll-target="customPanel">MAK Custom</button>
+
+      <div class="si-reno-tabs" role="tablist" aria-label="Modul SI RENO">
+        <button type="button" class="si-reno-tab active" data-sireno-tab="rekap" role="tab" aria-selected="true">Rekapitulasi</button>
+        <button type="button" class="si-reno-tab" data-sireno-tab="nominatif" role="tab" aria-selected="false">Nominatif</button>
       </div>
-      <div class="stats">
-        <div class="stat"><span>Data Terbaca</span><strong id="readCount">0</strong></div>
-        <div class="stat current"><span>Tahun Berjalan</span><strong id="currentCount">0</strong></div>
-        <div class="stat previous"><span>Tahun Sebelumnya</span><strong id="previousCount">0</strong></div>
-        <div class="stat unmapped"><span>Tidak Terklasifikasi</span><strong id="unmappedCount">0</strong></div>
-        <div class="stat period"><span>Periode</span><strong id="periodText">-</strong></div>
-        <div class="stat sheets"><span>Sheet Dibuat</span><strong id="sheetCount">0</strong></div>
-      </div>
-      <div id="monthPanel" class="hidden">
-        <label>Filter Bulan Pencairan</label>
-        <div id="monthFilter" class="month-filter"></div>
-      </div>
-      <div class="table-wrap">
-        <div id="summaryTable"></div>
-      </div>
-      <details id="unclassifiedDetails" class="hidden">
-        <summary>Detail Tidak Terklasifikasi</summary>
-        <div class="detail-body">
-          <div class="table-wrap">
-            <table id="unclassifiedTable"></table>
+
+      <div id="rekapTabPanel" class="si-reno-tab-panel">
+        <div class="recap-headline">
+          <div>
+            <h3>Rekapitulasi Keseluruhan Layanan</h3>
+            <p class="small">Rekapitulasi Tahun Berjalan berdasarkan Jenis Permohonan dan Status. Filter bulan dapat digunakan untuk melihat periode tertentu.</p>
           </div>
-          <p class="small">Klasifikasi manual disimpan di browser ini dan akan dipakai lagi saat file diproses ulang.</p>
+          <span id="recapPeriod" class="recap-period">Seluruh Bulan</span>
         </div>
-      </details>
-      <div id="customPanel" class="custom-panel hidden">
-        <label>MAK Custom / Di Luar Klasifikasi Tetap</label>
+        <div id="recapMonthPanel" class="recap-month-filter hidden">
+          <label>Filter Bulan Rekapitulasi</label>
+          <div id="recapMonthFilter" class="month-filter"></div>
+          <p class="small">Pilih bulan yang ingin direkap. Default: seluruh bulan pada file.</p>
+        </div>
+        <div id="recapStats" class="stats"></div>
+        <div class="recap-table-wrap">
+          <table id="recapTable" class="recap-table"></table>
+        </div>
+        <div class="recap-note">
+          Tampilan ini bekerja seperti Pivot Table: setiap jenis layanan direkap menjadi satu baris dan jumlahnya dipecah berdasarkan status. Data Tahun Sebelumnya tidak dimasukkan ke Rekapitulasi.
+        </div>
+      </div>
+
+      <div id="nominatifTabPanel" class="si-reno-tab-panel hidden">
+        <div class="quick-nav">
+          <button type="button" data-scroll-target="currentYearSection">Tahun Berjalan</button>
+          <button type="button" data-scroll-target="previousYearSection">Tahun Sebelumnya</button>
+          <button type="button" data-scroll-target="unclassifiedDetails">Tidak Terklasifikasi</button>
+          <button type="button" data-scroll-target="customPanel">MAK Custom</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><span>Data Terbaca</span><strong id="readCount">0</strong></div>
+          <div class="stat current"><span>Tahun Berjalan</span><strong id="currentCount">0</strong></div>
+          <div class="stat previous"><span>Tahun Sebelumnya</span><strong id="previousCount">0</strong></div>
+          <div class="stat unmapped"><span>Tidak Terklasifikasi</span><strong id="unmappedCount">0</strong></div>
+          <div class="stat period"><span>Periode</span><strong id="periodText">-</strong></div>
+          <div class="stat sheets"><span>Sheet Dibuat</span><strong id="sheetCount">0</strong></div>
+        </div>
+
+        <div id="monthPanel" class="hidden">
+          <label>Filter Bulan Pencairan</label>
+          <div id="monthFilter" class="month-filter"></div>
+        </div>
+
         <div class="table-wrap">
-          <table id="customTable"></table>
+          <div id="summaryTable"></div>
+        </div>
+
+        <details id="unclassifiedDetails" class="hidden">
+          <summary>Detail Tidak Terklasifikasi</summary>
+          <div class="detail-body">
+            <div class="table-wrap">
+              <table id="unclassifiedTable"></table>
+            </div>
+            <p class="small">Klasifikasi manual disimpan di browser ini dan akan dipakai lagi saat file diproses ulang.</p>
+          </div>
+        </details>
+
+        <div id="customPanel" class="custom-panel hidden">
+          <label>MAK Custom / Di Luar Klasifikasi Tetap</label>
+          <div class="table-wrap">
+            <table id="customTable"></table>
+          </div>
+        </div>
+
+        <div class="actions-toolbar" style="margin-top:16px;">
+          <div class="actions">
+            <button id="downloadBtn" class="secondary" type="button" disabled>Download Excel Nominatif</button>
+            <button id="downloadCustomBtn" class="secondary" type="button" disabled>Download MAK Custom</button>
+          </div>
+          <span class="small">Output pencairan tersedia setelah data berhasil diproses.</span>
         </div>
       </div>
     </section>
+
   </main>
 
   <div id="detailModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
@@ -716,11 +905,11 @@
   <div id="aboutModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
     <div class="modal" style="max-width:720px;">
       <div class="modal-head">
-        <div><h2 id="aboutTitle">Tentang Aplikasi</h2><p class="small" style="margin:4px 0 0;">Versi 6.0</p></div>
+        <div><h2 id="aboutTitle">Tentang Aplikasi</h2><p class="small" style="margin:4px 0 0;">Versi 8.11</p></div>
         <button id="closeAboutBtn" class="icon-button" type="button" aria-label="Tutup informasi aplikasi">×</button>
       </div>
       <div class="modal-body">
-        <p class="small" style="margin-top:0;">Aplikasi Daftar Nominatif Pencairan membantu menyiapkan rekap dan eviden layanan pertanahan dari data Excel.</p>
+        <p class="small" style="margin-top:0;">SI RENO membantu menyiapkan rekapitulasi dan nominatif layanan pertanahan dari data Excel.</p>
         <div class="about-list">
           <div class="about-item"><strong>Pengolahan data</strong><span>Membaca Excel pendapatan harian, mengelompokkan layanan ke MAK dan sublayanan, serta menampilkan status berkas.</span></div>
           <div class="about-item"><strong>Periode dan monitoring</strong><span>Memfilter data per bulan, merangkum tahun berjalan, dan memantau backlog tahun sebelumnya.</span></div>
@@ -845,6 +1034,7 @@
       customWorkbook: null,
       customFileName: '',
       selectedMonths: new Set(),
+      selectedRecapMonths: new Set(),
       availableMonths: [],
       detailSets: [],
       currentDetail: null,
@@ -856,15 +1046,16 @@
 
     const els = {
       file: document.getElementById('excelFile'),
-      kasiName: document.getElementById('kasiName'),
-      kasiNip: document.getElementById('kasiNip'),
-      kasiPosition: document.getElementById('kasiPosition'),
-      positionTemplate: document.getElementById('positionTemplate'),
       processBtn: document.getElementById('processBtn'),
       downloadBtn: document.getElementById('downloadBtn'),
       downloadCustomBtn: document.getElementById('downloadCustomBtn'),
       message: document.getElementById('message'),
       preview: document.getElementById('preview'),
+      recapTable: document.getElementById('recapTable'),
+      recapStats: document.getElementById('recapStats'),
+      recapPeriod: document.getElementById('recapPeriod'),
+      recapMonthPanel: document.getElementById('recapMonthPanel'),
+      recapMonthFilter: document.getElementById('recapMonthFilter'),
       readCount: document.getElementById('readCount'),
       currentCount: document.getElementById('currentCount'),
       previousCount: document.getElementById('previousCount'),
@@ -906,16 +1097,20 @@
       closeAboutBtn: document.getElementById('closeAboutBtn')
     };
 
+    document.querySelectorAll('[data-sireno-tab]').forEach(tab => {
+      tab.addEventListener('click', () => switchSIRenoTab(tab.dataset.sirenoTab));
+    });
     els.processBtn.addEventListener('click', processFile);
-    els.positionTemplate.addEventListener('change', handlePositionTemplateChange);
     els.downloadBtn.addEventListener('click', downloadWorkbook);
     els.downloadCustomBtn.addEventListener('click', downloadCustomWorkbook);
     els.monthFilter.addEventListener('change', handleMonthChange);
+    els.recapMonthFilter.addEventListener('change', handleRecapMonthChange);
     els.unclassifiedTable.addEventListener('click', handleDetailClick);
     els.unclassifiedTable.addEventListener('click', handleManualClassification);
     els.unclassifiedTable.addEventListener('input', handleUnclassifiedFormChange);
     els.unclassifiedTable.addEventListener('change', handleUnclassifiedFormChange);
     els.summaryTable.addEventListener('click', handleDetailClick);
+    els.recapTable.addEventListener('click', handleDetailClick);
     els.customTable.addEventListener('click', handleDetailClick);
     els.customTable.addEventListener('click', handleCustomRelease);
     els.closeDetailBtn.addEventListener('click', closeDetailModal);
@@ -960,21 +1155,11 @@
     pingExtension();
     setInterval(pingExtension, 3000);
 
-    function handlePositionTemplateChange() {
-      const selected = els.positionTemplate.value;
-      const manual = selected === '__manual__';
-      els.kasiPosition.hidden = !manual;
-      if (manual) {
-        els.kasiPosition.value = '';
-        els.kasiPosition.focus();
-      } else {
-        els.kasiPosition.value = selected;
-      }
-    }
 
     els.file.addEventListener('change', () => {
       const file = els.file.files[0];
       els.fileNameText.textContent = file ? file.name : 'Format .xlsx atau .xls';
+      if (file) processFile();
     });
     ['dragenter', 'dragover'].forEach(type => els.uploadZone.addEventListener(type, event => {
       event.preventDefault();
@@ -1064,14 +1249,53 @@
       }
       return true;
     }
+    const UNCLASSIFIED_MASTER_SERVICES = [
+      'Pendaftaran Tanah Pertama Kali Konversi/Pengakuan/Penegasan Hak',
+      'Pengukuran - ASN',
+      'Pengukuran Dan Pemetaan Kadastral',
+      'Izin Peralihan Hak Pakai/Hak Milik',
+      'PTP Penyelenggaraan Kebijakan Penggunaan Dan Pemanfaatan Tanah',
+      'Peta Analisis Penatagunaan Tanah',
+      'PTP PKKPR Untuk Kegiatan Berusaha',
+      'Pengembalian Batas',
+      'Pendaftaran Tanah Pertama Kali Pemberian Hak',
+      'Pengukuran Ulang Dan Pemetaan Kadastral',
+      'Permohonan SK Pemberian Hak Pakai Perorangan',
+      'PTP PKKPR Untuk Kegiatan Non Berusaha',
+      'Pemberian Cuti/Pemberhentian Sementara',
+      'Informasi Titik Koordinat',
+      'Permohonan SK Pemberian Hak Milik Badan Hukum',
+      'Perubahan Hak Atas Tanah Dengan Konstatasi',
+      'Ganti Nama Pemegang Hak Tanggungan'
+    ];
+
+    const UNCLASSIFIED_MASTER_SET = new Set(
+      UNCLASSIFIED_MASTER_SERVICES.map(item => cleanText(item).toLowerCase())
+    );
+
+    function isMasterUnclassifiedJenis(jenis) {
+      return UNCLASSIFIED_MASTER_SET.has(cleanText(jenis).toLowerCase());
+    }
 
     function classifyApplication(jenisPermohonan) {
       const manual = getManualMapping(jenisPermohonan);
       if (manual) return manual;
 
-      const text = cleanText(jenisPermohonan).toLowerCase();
+      const cleanJenis = cleanText(jenisPermohonan);
+      const text = cleanJenis.toLowerCase();
       if (!text) return null;
 
+      // Jenis yang ada dalam master "belum punya MAK/sub layanan" harus
+      // berhenti di sini sebelum keyword classifier.
+      if (isMasterUnclassifiedJenis(cleanJenis)) return null;
+
+      // Jenis layanan yang sudah ditetapkan dalam master sebagai BELUM
+      // memiliki MAK/sub-layanan harus selalu masuk Tidak Terklasifikasi.
+      // Pengecekan ini dilakukan SEBELUM keyword classifier agar tidak
+      // terseret oleh keyword umum seperti "ganti nama" atau "konstatasi".
+      if (UNCLASSIFIED_MASTER_SERVICES.some(item => cleanText(item).toLowerCase() === text)) {
+        return null;
+      }
       // Layanan yang memuat "Konversi" merupakan Program Sertipikasi PTSL ASN
       // Kategori 2, sehingga tidak dimasukkan ke MAK 7971.BAH.001.
       if (text.includes('konversi')) return null;
@@ -1106,6 +1330,11 @@
       }
       if (containsAny(text, ['hak guna bangunan perorangan', 'hgb perorangan'])) {
         return service('6415.BAH.001', 'Permohonan SK Pemberian Hak Guna Bangunan Perorangan');
+      }
+      // Hak Milik Badan Hukum belum memiliki mapping MAK/sub layanan di master.
+      // Jangan biarkan keyword umum "pemberian hak milik" salah menangkapnya sebagai Perorangan.
+      if (containsAny(text, ['hak milik badan hukum', 'pemberian hak milik badan hukum'])) {
+        return null;
       }
       if (containsAny(text, ['hak milik perorangan', 'pemberian hak milik'])) {
         return service('6415.BAH.001', 'Permohonan SK Pemberian Hak Milik Perorangan');
@@ -1453,7 +1682,8 @@
 
     function rebuildRecordsWithManualMappings() {
       appState.allRecords = appState.allRecords.map(row => {
-        const classification = classifyApplication(row.jenis);
+        const manual = getManualMapping(row.jenis);
+        const classification = manual || (isMasterUnclassifiedJenis(row.jenis) ? null : classifyApplication(row.jenis));
         return {
           ...row,
           code: classification ? classification.code : 'TIDAK TERKLASIFIKASI',
@@ -1555,6 +1785,47 @@
       `).join('');
     }
 
+    function renderRecapMonthFilter() {
+      if (!appState.availableMonths.length) {
+        els.recapMonthPanel.classList.add('hidden');
+        els.recapMonthFilter.innerHTML = '';
+        return;
+      }
+      els.recapMonthPanel.classList.remove('hidden');
+      els.recapMonthFilter.innerHTML = appState.availableMonths.map(key => `
+        <label>
+          <input type="checkbox" value="${escapeHtml(key)}" ${appState.selectedRecapMonths.has(key) ? 'checked' : ''}>
+          ${escapeHtml(monthLabelFromKey(key))}
+        </label>
+      `).join('');
+    }
+
+    function handleRecapMonthChange() {
+      const checked = Array.from(els.recapMonthFilter.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(input => input.value);
+      if (!checked.length) {
+        showMessage('Pilih minimal satu bulan untuk rekapitulasi.', 'error');
+        renderRecapMonthFilter();
+        return;
+      }
+      if (!areMonthsContiguous(checked)) {
+        showMessage('Periode rekapitulasi harus berurutan. Pilih rentang bulan tanpa loncatan.', 'error');
+        renderRecapMonthFilter();
+        return;
+      }
+      clearMessage();
+      appState.selectedRecapMonths = new Set(checked);
+      renderOverallRecap(getRecapFilteredRecords());
+    }
+
+    function getRecapFilteredRecords() {
+      // Rekapitulasi hanya menggunakan Tahun Berjalan.
+      // Tahun Sebelumnya tetap dipertahankan untuk tab Nominatif.
+      const currentYearRecords = appState.allRecords.filter(row => !row.isDifferentBerkasYear);
+      if (!appState.selectedRecapMonths.size) return currentYearRecords;
+      return currentYearRecords.filter(row => !row.monthKey || appState.selectedRecapMonths.has(row.monthKey));
+    }
+
     function handleMonthChange() {
       const checked = Array.from(els.monthFilter.querySelectorAll('input[type="checkbox"]:checked')).map(input => input.value);
       if (!checked.length) {
@@ -1591,9 +1862,170 @@
       }));
     }
 
+    function switchSIRenoTab(tabName) {
+      const isRekap = tabName !== 'nominatif';
+      document.querySelectorAll('[data-sireno-tab]').forEach(tab => {
+        const active = (isRekap && tab.dataset.sirenoTab === 'rekap') ||
+          (!isRekap && tab.dataset.sirenoTab === 'nominatif');
+        tab.classList.toggle('active', active);
+        tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      document.getElementById('rekapTabPanel').classList.toggle('hidden', !isRekap);
+      document.getElementById('nominatifTabPanel').classList.toggle('hidden', isRekap);
+    }
+
+    function renderOverallRecap(records) {
+      if (!els.recapTable) return;
+
+      const source = records || [];
+      const statusSet = new Set();
+      source.forEach(row => statusSet.add(cleanText(row.status) || 'Status Tidak Tersedia'));
+      const statuses = Array.from(statusSet);
+
+      const grouped = new Map();
+      source.forEach(row => {
+        const jenis = cleanText(row.jenis) || '(Jenis Permohonan Kosong)';
+        if (!grouped.has(jenis)) grouped.set(jenis, []);
+        grouped.get(jenis).push(row);
+      });
+
+      const groups = Array.from(grouped.entries())
+        .map(([jenis, rows]) => ({ jenis, rows }))
+        .sort((a, b) => a.jenis.localeCompare(b.jenis, 'id', { sensitivity: 'base' }));
+
+      const total = source.length;
+      const monthKeys = new Set(source.map(row => row.monthKey).filter(Boolean));
+      if (els.recapPeriod) {
+        const selectedCount = appState.selectedRecapMonths.size;
+        const allCount = appState.availableMonths.length;
+        els.recapPeriod.textContent = selectedCount && selectedCount === allCount
+          ? `Seluruh Bulan · ${monthKeys.size} bulan`
+          : selectedCount
+            ? `${selectedCount} Bulan`
+            : 'Seluruh Data';
+      }
+
+      if (els.recapStats) {
+        const top = groups[0] || null;
+        const smallest = groups.length
+          ? groups[groups.length - 1]
+          : null;
+
+        const monthGroups = new Map();
+        source.forEach(row => {
+          if (!row.monthKey) return;
+          if (!monthGroups.has(row.monthKey)) monthGroups.set(row.monthKey, []);
+          monthGroups.get(row.monthKey).push(row);
+        });
+        const monthRank = Array.from(monthGroups.entries())
+          .map(([key, rows]) => ({ key, rows, count: rows.length }))
+          .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
+        const busiestMonth = monthRank[0] || null;
+        const quietestMonth = monthRank.length ? monthRank[monthRank.length - 1] : null;
+
+        const statusGroups = new Map();
+        source.forEach(row => {
+          const status = cleanText(row.status) || 'Status Tidak Tersedia';
+          if (!statusGroups.has(status)) statusGroups.set(status, []);
+          statusGroups.get(status).push(row);
+        });
+        const dominantStatus = Array.from(statusGroups.entries())
+          .map(([status, rows]) => ({ status, rows, count: rows.length }))
+          .sort((a, b) => b.count - a.count || a.status.localeCompare(b.status, 'id'))[0] || null;
+
+        const pct = count => total ? `${((count / total) * 100).toFixed(1).replace('.', ',')}%` : '0%';
+        const serviceLabel = item => item ? escapeHtml(item.jenis) : '—';
+        const monthLabel = item => item ? escapeHtml(monthLabelFromKey(item.key)) : '—';
+
+        els.recapStats.innerHTML = `
+          <div class="stat insight-card">
+            <span>TOTAL BERKAS</span>
+            <strong>${total.toLocaleString('id-ID')}</strong>
+            <small>${groups.length} jenis layanan</small>
+          </div>
+          <div class="stat insight-card">
+            <span>LAYANAN TERBANYAK</span>
+            <strong>${top ? top.rows.length.toLocaleString('id-ID') : 0}</strong>
+            <small>${serviceLabel(top)}${top ? ` · ${pct(top.rows.length)}` : ''}</small>
+          </div>
+          <div class="stat insight-card">
+            <span>LAYANAN TERKECIL</span>
+            <strong>${smallest ? smallest.rows.length.toLocaleString('id-ID') : 0}</strong>
+            <small>${serviceLabel(smallest)}${smallest ? ` · ${pct(smallest.rows.length)}` : ''}</small>
+          </div>
+          <div class="stat insight-card">
+            <span>BULAN TERPADAT</span>
+            <strong>${busiestMonth ? busiestMonth.count.toLocaleString('id-ID') : 0}</strong>
+            <small>${monthLabel(busiestMonth)}</small>
+          </div>
+          <div class="stat insight-card">
+            <span>BULAN TERENDAH</span>
+            <strong>${quietestMonth ? quietestMonth.count.toLocaleString('id-ID') : 0}</strong>
+            <small>${monthLabel(quietestMonth)}</small>
+          </div>
+          <div class="stat insight-card">
+            <span>STATUS DOMINAN</span>
+            <strong>${dominantStatus ? dominantStatus.count.toLocaleString('id-ID') : 0}</strong>
+            <small>${dominantStatus ? escapeHtml(dominantStatus.status) : '—'}${dominantStatus ? ` · ${pct(dominantStatus.count)}` : ''}</small>
+          </div>
+        `;
+      }
+
+      if (!source.length) {
+        els.recapTable.innerHTML = '<tbody><tr><td>Belum ada data untuk direkap.</td></tr></tbody>';
+        return;
+      }
+
+      /*
+       * Semua angka pada tabel Rekapitulasi dibuat sebagai tombol detail.
+       * - Total per jenis = seluruh berkas pada jenis tersebut.
+       * - Setiap kolom status = hanya berkas jenis + status tersebut.
+       * - Grand Total = seluruh berkas.
+       * - Grand Total per status = seluruh berkas dengan status tersebut.
+       *
+       * appState.detailSets menyimpan record yang tepat untuk setiap tombol,
+       * sehingga klik angka membuka list berkas pada modal Detail Data.
+       */
+      let html = '<thead><tr><th>Jenis Permohonan / Layanan</th><th>Total</th>';
+      statuses.forEach(status => html += `<th>${escapeHtml(status)}</th>`);
+      html += '</tr></thead><tbody>';
+
+      groups.forEach(group => {
+        html += `<tr><td><strong>${escapeHtml(group.jenis)}</strong></td>`;
+        html += `<td class="status-number">${detailButton(group.rows, `Rekapitulasi — ${group.jenis}`, 'Semua Status')}</td>`;
+
+        statuses.forEach(status => {
+          const statusRecords = group.rows.filter(row =>
+            (cleanText(row.status) || 'Status Tidak Tersedia') === status
+          );
+          html += `<td class="status-number">${detailButton(statusRecords, `Rekapitulasi — ${group.jenis}`, status)}</td>`;
+        });
+
+        html += '</tr>';
+      });
+
+      html += '<tr class="grand-total"><td>GRAND TOTAL</td>';
+      html += `<td class="status-number">${detailButton(source, 'Rekapitulasi — GRAND TOTAL', 'Semua Status')}</td>`;
+      statuses.forEach(status => {
+        const statusRecords = source.filter(row =>
+          (cleanText(row.status) || 'Status Tidak Tersedia') === status
+        );
+        html += `<td class="status-number">${detailButton(statusRecords, 'Rekapitulasi — GRAND TOTAL', status)}</td>`;
+      });
+      html += '</tr></tbody>';
+
+      els.recapTable.innerHTML = html;
+    }
+
     function renderPreview(processed, sheetCount) {
       els.preview.classList.remove('hidden');
       appState.detailSets = [];
+      // Rekapitulasi SI RENO selalu menampilkan keseluruhan bulan/data.
+      // Tab Nominatif tetap mengikuti filter bulan yang dipilih.
+      appState.selectedRecapMonths = new Set(appState.availableMonths);
+      renderRecapMonthFilter();
+      switchSIRenoTab('rekap');
+      renderOverallRecap(getRecapFilteredRecords());
       els.readCount.textContent = processed.records.length;
       els.currentCount.textContent = processed.currentYearRecords.length;
       els.previousCount.textContent = processed.previousYearRecords.length;
@@ -1656,15 +2088,63 @@
       return html;
     }
 
-    function detailButton(records, title, status) {
+    function detailButton(records, title, status, source = 'nominatif') {
       const count = records.length;
       if (!count) return '<button class="count-btn" type="button" disabled>0</button>';
       const index = appState.detailSets.push({ title, status, records }) - 1;
       return `<button class="count-btn" type="button" data-detail-index="${index}">${count}</button>`;
     }
 
+    // Master layanan yang sengaja BELUM diberi MAK/sub-layanan.
+    // Jika jenis ini muncul di Excel, tetap tampil di tabel Tidak Terklasifikasi.
+
     function renderUnclassifiedDetails(processed) {
-      const groups = groupByJenis(processed.unclassified);
+      /*
+       * AUDIT FIX:
+       * Sumber daftar Detail Tidak Terklasifikasi adalah data Excel aktual
+       * pada periode yang sedang dipilih.
+       *
+       * Untuk setiap jenis yang tercantum dalam master BELUM ADA MAK/SUB LAYANAN,
+       * tabel mengambil record berdasarkan nama Jenis Permohonan secara langsung.
+       * Dengan demikian layanan tersebut TIDAK MUNGKIN hilang hanya karena
+       * keyword classifier sebelumnya menangkapnya.
+       *
+       * Jenis baru yang tidak ada di master tetapi classifier tidak mengenalinya
+       * juga otomatis ikut melalui processed.unclassified.
+       */
+      const filteredRecords = getFilteredRecords();
+      const groupsMap = new Map();
+
+      filteredRecords.forEach(row => {
+        const jenis = cleanText(row.jenis) || '(Jenis Permohonan Kosong)';
+        const forceUnclassified = isMasterUnclassifiedJenis(jenis);
+        const isUnclassified = forceUnclassified || row.code === 'TIDAK TERKLASIFIKASI';
+        if (!isUnclassified) return;
+
+        if (!groupsMap.has(jenis)) groupsMap.set(jenis, []);
+        groupsMap.get(jenis).push(row);
+      });
+
+      const groups = Array.from(groupsMap.entries()).map(([jenis, records]) => ({
+        jenis,
+        records
+      }));
+
+      // Master-first: layanan yang sudah kita tandai belum punya MAK ditampilkan
+      // lebih dahulu, lalu jenis baru dari Excel.
+      groups.sort((a, b) => {
+        const ai = UNCLASSIFIED_MASTER_SERVICES.findIndex(
+          item => cleanText(item).toLowerCase() === cleanText(a.jenis).toLowerCase()
+        );
+        const bi = UNCLASSIFIED_MASTER_SERVICES.findIndex(
+          item => cleanText(item).toLowerCase() === cleanText(b.jenis).toLowerCase()
+        );
+        if (ai !== -1 && bi !== -1) return ai - bi;
+        if (ai !== -1) return -1;
+        if (bi !== -1) return 1;
+        return a.jenis.localeCompare(b.jenis, 'id');
+      });
+
       els.unclassifiedDetails.classList.toggle('hidden', !groups.length);
       if (!groups.length) {
         els.unclassifiedTable.innerHTML = '';
@@ -1672,8 +2152,11 @@
       }
 
       const makOptions = classificationOptions();
-      let html = '<thead><tr><th>Jenis Permohonan</th><th>Jumlah</th><th>Kelompok MAK</th><th>Sub Layanan</th><th>MAK Custom</th><th>Aksi</th></tr></thead><tbody>';
+      let html = '<thead><tr><th>Sub Layanan / Jenis Permohonan</th><th>Jumlah</th><th>Kelompok MAK</th><th>Sub Layanan Master</th><th>MAK Custom</th><th>Aksi</th></tr></thead><tbody>';
+
       groups.forEach((group, index) => {
+        const isKnownUnmapped = isMasterUnclassifiedJenis(group.jenis);
+
         html += `
           <tr>
             <td>${escapeHtml(group.jenis)}</td>
@@ -1685,8 +2168,13 @@
               </select>
             </td>
             <td>
-              <select data-role="subservice" data-index="${index}" disabled>
-                <option value="">Pilih sub layanan</option>
+              <div class="small">
+                ${isKnownUnmapped
+                  ? 'Belum memiliki MAK / sub layanan pada master'
+                  : 'Jenis baru dari Excel — belum ada di master'}
+              </div>
+              <select data-role="subservice" data-index="${index}" disabled style="margin-top:6px;">
+                <option value="">Pilih sub layanan untuk mapping</option>
               </select>
             </td>
             <td>
@@ -1702,6 +2190,7 @@
           </tr>
         `;
       });
+
       html += '</tbody>';
       els.unclassifiedTable.innerHTML = html;
     }
@@ -1967,21 +2456,34 @@
       closeDownloadMenu();
       const detail = appState.currentDetail;
       if (!detail || !detail.records.length) return;
-      const headers = detail.records[0].rawHeaders && detail.records[0].rawHeaders.length
+      const rawHeaders = detail.records[0].rawHeaders && detail.records[0].rawHeaders.length
         ? detail.records[0].rawHeaders
         : ['Nama Pemohon', 'Jenis Permohonan', 'Nomor Berkas', 'Status'];
+
+      // Jangan ikutkan kolom placeholder seperti "Kolom 16", "Kolom 17", dst.
+      // Kolom tersebut muncul karena sumber Excel memiliki kolom kosong tanpa judul.
+      const rawColumnIndexes = rawHeaders
+        .map((header, index) => ({ header: cleanText(header), index }))
+        .filter(item => item.header && !/^Kolom\s+\d+$/i.test(item.header));
+
+      const headers = rawColumnIndexes.map(item => item.header);
       const outputHeaders = isPemecahanDetail(detail)
         ? [...headers, 'Bulan', 'Jenis Sublayanan', 'Jumlah Bidang', 'Volume Pencairan', 'Satuan', 'Status Pengecekan Bidang']
         : [...headers, 'Bulan'];
+
       const aoa = [
         outputHeaders,
         ...sortDetailRecords(detail.records).map(row => {
           if (row.rawRow && row.rawRow.length) {
-            const base = headers.map((_, index) => row.rawRow[index] ?? '');
-            return isPemecahanDetail(detail) ? [...base, formatMonthKey(row.monthKey), detailSubservice(row), isPemecahanRow(row) ? (row.jumlahBidang ?? '') : '', rowVolume(row), rowUnit(row), isPemecahanRow(row) ? row.statusBidang : 'Tidak perlu cek'] : [...base, formatMonthKey(row.monthKey)];
+            const base = rawColumnIndexes.map(item => row.rawRow[item.index] ?? '');
+            return isPemecahanDetail(detail)
+              ? [...base, formatMonthKey(row.monthKey), detailSubservice(row), isPemecahanRow(row) ? (row.jumlahBidang ?? '') : '', rowVolume(row), rowUnit(row), isPemecahanRow(row) ? row.statusBidang : 'Tidak perlu cek']
+              : [...base, formatMonthKey(row.monthKey)];
           }
           const base = [row.applicant, row.jenis, row.nomorBerkas, row.status];
-          return isPemecahanDetail(detail) ? [...base, formatMonthKey(row.monthKey), detailSubservice(row), isPemecahanRow(row) ? (row.jumlahBidang ?? '') : '', rowVolume(row), rowUnit(row), isPemecahanRow(row) ? row.statusBidang : 'Tidak perlu cek'] : [...base, formatMonthKey(row.monthKey)];
+          return isPemecahanDetail(detail)
+            ? [...base, formatMonthKey(row.monthKey), detailSubservice(row), isPemecahanRow(row) ? (row.jumlahBidang ?? '') : '', rowVolume(row), rowUnit(row), isPemecahanRow(row) ? row.statusBidang : 'Tidak perlu cek']
+            : [...base, formatMonthKey(row.monthKey)];
         })
       ];
       if (isPemecahanDetail(detail)) return downloadPemecahanWorkbook(detail.records, aoa, 'DETAIL LENGKAP', detailDownloadFileName('Eviden_Lengkap', detail), outputHeaders.map(() => 18));
@@ -2072,14 +2574,17 @@
       const rows = [
         [],
         signatureRow('Mengetahui,'),
-        signatureRow(els.kasiPosition.value.trim() || '..............................'),
+        signatureRow(''),
         [],
         [],
         [],
-        signatureRow(els.kasiName.value.trim() || '..............................'),
-        signatureRow(`NIP. ${els.kasiNip.value.trim() || '..............................'}`)
+        signatureRow(''),
+        signatureRow('')
       ];
       XLSX.utils.sheet_add_aoa(ws, rows, { origin: -1 });
+      ws[XLSX.utils.encode_cell({ r: currentRowCount + 2, c: signatureStart })] = referenceFormula('$B$6');
+      ws[XLSX.utils.encode_cell({ r: currentRowCount + 6, c: signatureStart })] = referenceFormula('$B$4');
+      ws[XLSX.utils.encode_cell({ r: currentRowCount + 7, c: signatureStart })] = referenceFormula('$B$5');
       [1, 2, 6, 7].forEach(offset => {
         mergeCells(ws, currentRowCount + offset, signatureStart, currentRowCount + offset, colCount - 1);
         const cell = ws[XLSX.utils.encode_cell({ r: currentRowCount + offset, c: signatureStart })];
@@ -2384,13 +2889,71 @@
       if (nameInput) nameInput.disabled = Boolean(selectedCode);
     }
 
+
+    function addReferenceSheet(wb) {
+      const aoa = [
+        ['REFERENSI DATA PENANDA TANGAN'],
+        ['Isi data pada kolom B. Seluruh sheet NOMINATIF menggunakan referensi dari sheet ini.'],
+        [],
+        ['Nama Penanda Tangan', ''],
+        ['NIP Penanda Tangan', ''],
+        ['Jabatan Penanda Tangan', ''],
+        [],
+        ['PETUNJUK'],
+        ['1. Isi atau ubah data pada sel B4:B6.'],
+        ['2. Jangan mengubah nama sheet REFERENSI.'],
+        ['3. Perubahan data pada sheet REFERENSI akan menjadi sumber seluruh tanda tangan pada sheet NOMINATIF.']
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      mergeRow(ws, 0, 2);
+      mergeRow(ws, 1, 2);
+      applyReferenceStyle(ws, aoa.length, 2);
+      ws['!cols'] = makeCols([34, 58]);
+      ws['!freeze'] = { xSplit: 0, ySplit: 3 };
+      XLSX.utils.book_append_sheet(wb, ws, 'REFERENSI');
+    }
+
+    function referenceFormula(cellRef) {
+      return { f: "'REFERENSI'!" + cellRef };
+    }
+
+    function applyReferenceStyle(ws, rowCount, colCount) {
+      for (let r = 0; r < rowCount; r++) {
+        for (let c = 0; c < colCount; c++) {
+          const cell = ws[XLSX.utils.encode_cell({ r, c })];
+          if (!cell) continue;
+          cell.s = baseCellStyle();
+          if (r === 0) {
+            cell.s.font = { name: 'Arial', sz: 14, bold: true, color: { rgb: '12345A' } };
+            cell.s.alignment = { horizontal: 'center', vertical: 'center' };
+            cell.s.border = {};
+          } else if (r === 1) {
+            cell.s.font = { name: 'Arial', sz: 10, italic: true, color: { rgb: '5D7690' } };
+            cell.s.alignment = { horizontal: 'center', vertical: 'center', wrapText: true };
+            cell.s.border = {};
+          } else if (r >= 3 && r <= 5 && c === 0) {
+            cell.s.font = { name: 'Arial', sz: 10, bold: true };
+            cell.s.fill = { fgColor: { rgb: 'DDEBFA' } };
+          } else if (r >= 3 && r <= 5 && c === 1) {
+            cell.s.fill = { fgColor: { rgb: 'FFF7D6' } };
+          } else if (r === 7) {
+            cell.s.font = { name: 'Arial', sz: 10, bold: true };
+            cell.s.fill = { fgColor: { rgb: 'EAF3FC' } };
+          }
+        }
+      }
+    }
+
     function buildOutputWorkbook(processed) {
       const wb = XLSX.utils.book_new();
+      addReferenceSheet(wb);
       addRekapSheetsByYear(wb, processed);
       MAK_DEFINITIONS.forEach(def => addCoverSheet(wb, processed, def));
       MAK_DEFINITIONS.forEach(def => addNominativeSheets(wb, processed, def));
       addCustomSheets(wb, processed);
       if (processed.unclassified.length) addUnclassifiedSheet(wb, processed);
+      wb.Workbook = wb.Workbook || {};
+      wb.Workbook.CalcPr = { calcMode: 'auto', fullCalcOnLoad: true, forceFullCalc: true };
       return wb;
     }
 
@@ -2568,12 +3131,12 @@
         }),
         [],
         signatureRow('Mengetahui,'),
-        signatureRow(els.kasiPosition.value.trim() || '..............................'),
+        signatureRow(''),
         [],
         [],
         [],
-        signatureRow(els.kasiName.value.trim() || '..............................'),
-        signatureRow(`NIP. ${els.kasiNip.value.trim() || '..............................'}`)
+        signatureRow(''),
+        signatureRow('')
       ];
       const ws = XLSX.utils.aoa_to_sheet(aoa);
       mergeRow(ws, 0, width);
@@ -2581,6 +3144,12 @@
       mergeRow(ws, 2, width);
       [records.length + 6, records.length + 7, records.length + 11, records.length + 12]
         .forEach(rowIndex => mergeCells(ws, rowIndex, signatureStart, rowIndex, width - 1));
+      ws[XLSX.utils.encode_cell({ r: records.length + 7, c: signatureStart })] = referenceFormula('$B$6');
+      ws[XLSX.utils.encode_cell({ r: records.length + 11, c: signatureStart })] = referenceFormula('$B$4');
+      ws[XLSX.utils.encode_cell({ r: records.length + 12, c: signatureStart })] = {
+        f: "'REFERENSI'!$B$5"
+      };
+
       applyNominativeStyle(ws, aoa.length, width, records.length);
       ws['!rows'] = [];
       [records.length + 8, records.length + 9, records.length + 10].forEach(rowIndex => {
