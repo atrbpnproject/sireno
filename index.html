@@ -1,0 +1,2754 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aplikasi Daftar Nominatif Pencairan Layanan Pertanahan</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.min.js"></script>
+  <style>
+    :root {
+      --navy: #12345a;
+      --blue: #1f67ad;
+      --line: #d8e0ea;
+      --soft: #f4f7fb;
+      --text: #1d2939;
+      --muted: #65758b;
+      --danger: #b42318;
+      --ok: #047857;
+      --white: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: #eef3f8;
+    }
+
+    header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 24px;
+      border-bottom: 5px solid var(--blue);
+    }
+
+    header h1 {
+      max-width: 1180px;
+      margin: 0 auto;
+      font-size: 24px;
+      line-height: 1.3;
+      font-weight: 700;
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 24px auto 48px;
+      padding: 0 18px;
+    }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 6px 18px rgba(15, 35, 58, 0.06);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #26384f;
+      margin-bottom: 7px;
+    }
+
+    input[type="text"],
+    input[type="file"],
+    select {
+      width: 100%;
+      border: 1px solid #b9c6d6;
+      border-radius: 6px;
+      padding: 11px 12px;
+      font-size: 14px;
+      background: var(--white);
+    }
+
+    input[type="file"] {
+      padding: 9px 10px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      padding: 11px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button.primary {
+      color: var(--white);
+      background: var(--blue);
+    }
+
+    button.secondary {
+      color: var(--white);
+      background: var(--ok);
+    }
+
+    button:disabled {
+      background: #9aa8b8;
+      cursor: not-allowed;
+    }
+
+    .message {
+      display: none;
+      margin-top: 14px;
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .message.error {
+      display: block;
+      color: #7a271a;
+      background: #ffebe7;
+      border: 1px solid #f8b4a6;
+    }
+
+    .message.success {
+      display: block;
+      color: #064e3b;
+      background: #dcfce7;
+      border: 1px solid #86efac;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 24px;
+      color: var(--navy);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--white);
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    th {
+      color: var(--white);
+      background: var(--navy);
+      font-weight: 700;
+    }
+
+    tr.subrow td:first-child {
+      color: var(--muted);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 8px 0 0;
+    }
+
+    .month-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0 18px;
+    }
+
+    .month-filter label {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--soft);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    details {
+      margin-top: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+
+    summary {
+      padding: 12px 14px;
+      font-weight: 700;
+      color: var(--navy);
+      cursor: pointer;
+    }
+
+    .detail-body {
+      padding: 0 14px 14px;
+    }
+
+    .inline-form {
+      display: grid;
+      grid-template-columns: minmax(180px, 1.2fr) minmax(180px, 1fr) minmax(180px, 1fr) auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .inline-form button {
+      white-space: nowrap;
+    }
+
+    .custom-panel {
+      margin-top: 18px;
+    }
+
+    .count-btn {
+      border: 0;
+      background: transparent;
+      color: var(--blue);
+      padding: 0;
+      font: inherit;
+      font-weight: 700;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .count-btn:disabled {
+      color: var(--muted);
+      background: transparent;
+      cursor: default;
+      text-decoration: none;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.48);
+      z-index: 20;
+    }
+
+    .modal-backdrop.hidden {
+      display: none;
+    }
+
+    .modal {
+      width: min(980px, 100%);
+      max-height: 86vh;
+      overflow: hidden;
+      background: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 22px 60px rgba(15, 23, 42, 0.25);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-head h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--navy);
+    }
+
+    .modal-head .icon-button { flex:0 0 auto; }
+
+    .modal-body {
+      padding: 16px 18px;
+      overflow: auto;
+    }
+
+
+
+    /* Penyempurnaan UX tanpa mengubah mesin pengolahan data */
+    body { background: linear-gradient(180deg, #eaf1f8 0, #f7f9fc 280px, #eef3f8 100%); }
+    header {
+      position: relative;
+      overflow: hidden;
+      padding: 0;
+      border-bottom: 0;
+      background: linear-gradient(120deg, #0b2948 0%, #123f70 58%, #1f67ad 100%);
+      box-shadow: 0 10px 30px rgba(8, 37, 66, .2);
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      right: -140px;
+      top: -250px;
+      border-radius: 50%;
+      border: 70px solid rgba(255,255,255,.06);
+    }
+    .header-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .brand { display:flex; align-items:center; gap:16px; min-width:0; }
+    .app-logo {
+      width: 58px; height: 58px; flex:0 0 58px;
+      display:grid; place-items:center;
+      border-radius: 16px;
+      background: rgba(255,255,255,.97);
+      box-shadow: 0 10px 26px rgba(0,0,0,.18);
+      color: var(--navy);
+    }
+    .app-logo svg { width: 38px; height: 38px; }
+    .brand-kicker { margin:0 0 4px; font-size:12px; letter-spacing:.12em; font-weight:800; opacity:.72; }
+    header h1 { margin:0; max-width:none; font-size:24px; }
+    .brand-subtitle { margin:5px 0 0; font-size:13px; opacity:.82; }
+    .version-badge {
+      padding: 7px 10px; border:1px solid rgba(255,255,255,.25); border-radius:999px;
+      background:rgba(255,255,255,.1); color:#fff; font-size:12px; font-weight:800; white-space:nowrap;
+      box-shadow:none; cursor:pointer;
+    }
+    .version-badge:hover { background:rgba(255,255,255,.2); }
+    .about-list { display:grid; gap:10px; margin:14px 0 0; }
+    .about-item { padding:12px 14px; border:1px solid #dce5ee; border-radius:10px; background:#f8fafc; }
+    .about-item strong { display:block; margin-bottom:3px; color:#173f64; font-size:13px; }
+    .about-item span { color:#5c7185; font-size:12px; line-height:1.5; }
+    main { margin-top:22px; }
+    .panel { border-radius:14px; box-shadow:0 12px 32px rgba(15,35,58,.07); }
+    .panel-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:18px; }
+    .panel-heading h2 { margin:0; font-size:18px; color:var(--navy); }
+    .panel-heading p { margin:6px 0 0; color:var(--muted); font-size:13px; }
+    .step-badge { padding:7px 10px; border-radius:999px; background:#e8f2fc; color:var(--blue); font-size:12px; font-weight:800; }
+    input[type="text"], select { transition:border-color .2s, box-shadow .2s; }
+    input[type="text"]:focus, select:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(31,103,173,.14); }
+    .upload-zone {
+      position:relative; min-height:98px; display:flex; align-items:center; gap:13px;
+      padding:15px; border:2px dashed #a8bfd8; border-radius:12px; background:#f7fbff;
+      cursor:pointer; transition:.2s ease;
+    }
+    .upload-zone:hover, .upload-zone.dragover { border-color:var(--blue); background:#edf6ff; transform:translateY(-1px); }
+    .upload-zone input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+    .upload-icon { width:42px; height:42px; flex:0 0 42px; display:grid; place-items:center; border-radius:12px; background:#dcecff; color:var(--blue); font-size:22px; }
+    .upload-copy strong { display:block; color:var(--navy); font-size:14px; }
+    .upload-copy span { display:block; margin-top:4px; color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
+    .actions-toolbar { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; margin-top:18px; }
+    .actions-toolbar .actions { margin-top:0; }
+    button { transition:transform .15s, box-shadow .15s, opacity .15s; }
+    button:not(:disabled):hover { transform:translateY(-1px); box-shadow:0 7px 16px rgba(15,35,58,.15); }
+    button.primary { background:linear-gradient(135deg,#1f67ad,#174f87); }
+    button.secondary { background:linear-gradient(135deg,#07805f,#046c50); }
+    .quick-nav { display:flex; flex-wrap:wrap; gap:8px; padding:5px 0 18px; }
+    .quick-nav button { padding:8px 11px; border:1px solid #ccd9e7; background:#fff; color:var(--navy); border-radius:999px; font-size:12px; }
+    .stats { grid-template-columns:repeat(6,minmax(0,1fr)); }
+    .stat { position:relative; overflow:hidden; min-height:104px; border-radius:12px; background:#fff; }
+    .stat::before { content:''; position:absolute; inset:0 auto 0 0; width:4px; background:#8ba6c1; }
+    .stat.current::before { background:#0b8b68; }
+    .stat.previous::before { background:#e07922; }
+    .stat.unmapped::before { background:#c33a31; }
+    .stat.period::before { background:#7357b8; }
+    .stat.sheets::before { background:#287ab9; }
+    .stat span { text-transform:uppercase; letter-spacing:.04em; }
+    .stat strong { font-size:25px; }
+    .section-title {
+      display:flex; align-items:center; gap:10px; margin:22px 0 8px !important; padding:13px 15px;
+      border-radius:10px; background:#eef6ff; border-left:5px solid var(--blue);
+    }
+    .section-title.current { background:#eaf8f3; border-left-color:#07805f; }
+    .section-title.previous { background:#fff4e9; border-left-color:#e07922; }
+    .section-dot { width:10px; height:10px; border-radius:50%; background:currentColor; flex:0 0 10px; }
+    .table-wrap { max-width:100%; overflow-x:auto; border-radius:10px; scrollbar-gutter:stable; }
+    table { border-radius:10px; overflow:hidden; }
+    th { position:sticky; top:0; z-index:2; background:linear-gradient(180deg,#163e68,#12345a); }
+    tbody tr { transition:background .15s; }
+    tbody tr:hover td { background:#f2f7fc; }
+    tr.subrow td { background:#fbfdff; }
+    tr.subrow td:nth-child(2) { padding-left:24px; color:#41566f; }
+    .count-btn { display:inline-flex; min-width:28px; justify-content:center; padding:3px 7px; border-radius:999px; text-decoration:none; background:#e6f1fc; }
+    .count-btn:hover { background:#cfe6fa; }
+    .count-btn:disabled { background:#f0f2f5; }
+    details { border-radius:12px; overflow:hidden; }
+    summary { list-style:none; display:flex; align-items:center; gap:9px; background:#f8fbfe; }
+    summary::before { content:'▸'; transition:transform .2s; }
+    details[open] summary::before { transform:rotate(90deg); }
+    .year-block { margin-top:16px; padding:14px; border:1px solid #ead4bd; border-radius:12px; background:#fffaf5; }
+    .year-block h4 { margin:0 0 10px !important; display:flex; align-items:center; gap:8px; }
+    .year-badge { display:inline-flex; padding:4px 9px; border-radius:999px; background:#ffe1c2; color:#8a4a10; font-size:12px; font-weight:800; }
+    .modal { border-radius:14px; }
+    .modal-head { background:#f7fafd; }
+    .extension-status { display:inline-flex; align-items:center; gap:7px; padding:8px 11px; border-radius:999px; background:#fff4e5; color:#8a5410; font-size:12px; font-weight:700; border:1px solid #f0d5aa; }
+    .extension-status.ready { background:#eaf7f0; color:#17643e; border-color:#bfe2cf; }
+    .extension-status::before { content:''; width:8px; height:8px; border-radius:50%; background:currentColor; }
+    .bidang-progress { margin:12px 0; padding:12px 14px; border-radius:10px; background:#eef6fd; color:#174f7e; font-size:13px; }
+    .bidang-ok { font-weight:800; color:#17643e; }
+    .bidang-pending { color:#7a8794; }
+    .split-download { position:relative; display:inline-flex; }
+    .split-download > button:first-child { border-radius:8px 0 0 8px; }
+    .split-download > .download-menu-toggle { border-radius:0 8px 8px 0; min-width:42px; padding-left:12px; padding-right:12px; border-left:1px solid rgba(255,255,255,.35); }
+    .download-menu { position:absolute; right:0; top:calc(100% + 7px); z-index:20; min-width:220px; padding:7px; border:1px solid #d5dee8; border-radius:10px; background:#fff; box-shadow:0 12px 30px rgba(24,54,86,.18); }
+    .download-menu button { width:100%; text-align:left; background:#fff; color:#183a5b; border:0; box-shadow:none; }
+    .download-menu button:hover { background:#edf5fc; }
+    .extension-guide-banner { margin:14px 22px 0; padding:14px 16px; border:1px solid #f0d5aa; border-radius:12px; background:#fff8ed; color:#67430f; }
+    .extension-guide-banner h3 { margin:0 0 5px; font-size:15px; }
+    .extension-guide-banner p { margin:0 0 10px; font-size:12px; line-height:1.5; }
+    .extension-guide-banner .actions { margin:0; }
+    .extension-guide-banner a { display:inline-flex; align-items:center; padding:9px 13px; border-radius:8px; background:#1f67ad; color:#fff; font-size:12px; font-weight:800; text-decoration:none; }
+    .guide-steps { margin:0; padding-left:22px; color:#334d66; }
+    .guide-steps li { margin:0 0 12px; padding-left:5px; line-height:1.5; }
+    .guide-callout { padding:12px 14px; border-radius:10px; background:#eef6fd; color:#174f7e; font-size:13px; line-height:1.5; }
+    .icon-button { width:40px; height:40px; display:inline-grid; place-items:center; padding:0; border-radius:50%; background:transparent; color:#526579; font-size:25px; line-height:1; box-shadow:none; }
+    .icon-button:hover { background:#e8eef4; }
+    .overflow-wrap { position:relative; }
+    .overflow-menu { position:absolute; right:0; top:calc(100% + 7px); z-index:22; min-width:230px; padding:7px; border:1px solid #d5dee8; border-radius:10px; background:#fff; box-shadow:0 12px 30px rgba(24,54,86,.18); }
+    .overflow-menu button { width:100%; text-align:left; background:#fff; color:#183a5b; border:0; box-shadow:none; }
+    .overflow-menu button:hover { background:#edf5fc; }
+    .detail-summary { display:grid; grid-template-columns:repeat(4,minmax(120px,1fr)); gap:10px; margin:0 0 14px; }
+    .detail-summary .summary-card { padding:13px 14px; border:1px solid #dce5ee; border-radius:12px; background:#f8fafc; }
+    .summary-card span { display:block; color:#687b8e; font-size:11px; }
+    .summary-card strong { display:block; margin-top:4px; color:#0b3158; font-size:24px; }
+    .summary-card.total { background:#eaf7f0; border-color:#bfe2cf; }
+    .summary-card.total strong { color:#17643e; font-size:20px; overflow-wrap:anywhere; }
+    .month-recap { margin:0 0 14px; padding:10px 13px; border-radius:10px; background:#f1f6fb; color:#405b75; font-size:12px; }
+    .period-breakdown { margin:0 0 14px; border:1px solid #dce5ee; border-radius:12px; background:#f8fafc; overflow:hidden; }
+    .period-breakdown summary { cursor:pointer; padding:11px 14px; color:#244d70; font-size:12px; font-weight:800; list-style-position:inside; }
+    .month-recap-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:8px; max-height:230px; overflow:auto; padding:0 12px 12px; }
+    .month-recap-item { padding:10px 12px; border:1px solid #dce5ee; border-radius:9px; background:#fff; }
+    .month-recap-item strong { display:block; margin-bottom:4px; color:#173f64; font-size:12px; }
+    .month-recap-item span { display:block; color:#62778b; font-size:11px; line-height:1.55; }
+    .detail-tools { display:flex; align-items:center; gap:9px; margin:0 0 12px; }
+    .detail-actionbar { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 22px; border-bottom:1px solid #dce5ee; background:#fff; }
+    .detail-actionbar .actions { margin:0; flex-wrap:nowrap; }
+    .detail-tools input,.detail-tools select { margin:0; padding:9px 11px; min-height:38px; }
+    .detail-tools input { flex:1 1 360px; width:auto; min-width:260px; }
+    .detail-tools select { flex:0 0 190px; width:190px; }
+    .detail-actionbar .hidden { display:none !important; }
+    .detail-table.wide { min-width:980px; }
+    .progress-shell { margin:12px 0; padding:14px; border:1px solid #cce0f1; border-radius:12px; background:#f4f9fd; }
+    .progress-head { display:flex; justify-content:space-between; gap:12px; margin-bottom:8px; font-size:12px; font-weight:800; color:#174f7e; }
+    .progress-track { height:9px; overflow:hidden; border-radius:999px; background:#dce8f2; }
+    .progress-track span { display:block; height:100%; border-radius:inherit; background:#1f67ad; transition:width .25s ease; }
+    .progress-meta { display:flex; justify-content:space-between; gap:12px; margin-top:7px; color:#65798c; font-size:11px; }
+    .status-pill { display:inline-flex; align-items:center; padding:5px 9px; border-radius:999px; background:#edf2f6; color:#566b7f; font-size:11px; font-weight:800; }
+    .status-pill.success { background:#e5f5ed; color:#17643e; }
+    .status-pill.error { background:#fff0e3; color:#9b4e10; }
+    .toast-stack { position:fixed; right:22px; bottom:22px; z-index:100; display:grid; gap:10px; width:min(390px,calc(100vw - 44px)); }
+    .toast { padding:14px 16px; border-radius:12px; background:#0b3158; color:#fff; box-shadow:0 14px 35px rgba(11,49,88,.28); animation:toast-in .2s ease-out; }
+    .toast.success { background:#17643e; }.toast.error { background:#9b3f20; }
+    .toast strong { display:block; margin-bottom:3px; }.toast span { font-size:12px; opacity:.9; }
+    @keyframes toast-in { from { transform:translateY(10px); opacity:0; } }
+    @media (max-width:760px) { .detail-summary { grid-template-columns:1fr 1fr; } .detail-tools,.detail-actionbar { flex-wrap:wrap; } .detail-tools input,.detail-tools select { flex:1 1 100%; width:100%; min-width:0; } .detail-actionbar .actions { flex-wrap:wrap; } }
+    @media (max-width:1050px) { .stats { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+
+    @media (max-width: 760px) {
+      header h1 { font-size:20px; }
+      .header-inner { align-items:flex-start; }
+      .version-badge { padding:6px 9px; font-size:11px; }
+      .app-logo { width:50px; height:50px; flex-basis:50px; }
+      .stats { grid-template-columns:1fr 1fr; }
+
+      .grid,
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        padding: 16px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      .inline-form {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-backdrop {
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="app-logo" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 12h27l11 11v29H13V12Z" fill="#EAF3FC" stroke="currentColor" stroke-width="3"/>
+            <path d="M40 12v12h11" stroke="currentColor" stroke-width="3"/>
+            <path d="M21 33h22M21 41h22" stroke="#1F67AD" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="21" cy="24" r="4" fill="#E6A23C"/>
+          </svg>
+        </div>
+        <div>
+          <p class="brand-kicker">DASHBOARD LAYANAN PERTANAHAN</p>
+          <h1>Aplikasi Daftar Nominatif Pencairan</h1>
+          <p class="brand-subtitle">Rekap MAK, monitoring berkas tahun berjalan, dan backlog tahun sebelumnya</p>
+        </div>
+      </div>
+      <button id="appVersionBtn" class="version-badge" type="button" aria-haspopup="dialog">Versi 6.0</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel" id="inputPanel">
+      <div class="panel-heading">
+        <div><h2>Siapkan Data Pencairan</h2><p>Lengkapi identitas penanda tangan, lalu unggah Excel sumber untuk dianalisis.</p></div>
+        <span class="step-badge">LANGKAH 1</span>
+      </div>
+      <div class="grid">
+        <div>
+          <label for="kasiName">Nama Penanda Tangan</label>
+          <input id="kasiName" type="text" placeholder="Kosongkan jika belum diketahui">
+        </div>
+        <div>
+          <label for="kasiNip">NIP Penanda Tangan</label>
+          <input id="kasiNip" type="text" placeholder="Kosongkan jika belum diketahui">
+        </div>
+        <div>
+          <label for="positionTemplate">Jabatan Penanda Tangan</label>
+          <select id="positionTemplate">
+            <option value="">Pilih jabatan Kantor Pertanahan</option>
+            <option value="Kepala Subbagian Tata Usaha">Kepala Subbagian Tata Usaha</option>
+            <option value="Kepala Seksi Survei dan Pemetaan">Kepala Seksi Survei dan Pemetaan</option>
+            <option value="Kepala Seksi Penetapan Hak dan Pendaftaran">Kepala Seksi Penetapan Hak dan Pendaftaran</option>
+            <option value="Kepala Seksi Penataan dan Pemberdayaan">Kepala Seksi Penataan dan Pemberdayaan</option>
+            <option value="Kepala Seksi Pengadaan Tanah dan Pengembangan">Kepala Seksi Pengadaan Tanah dan Pengembangan</option>
+            <option value="Kepala Seksi Pengendalian dan Penanganan Sengketa">Kepala Seksi Pengendalian dan Penanganan Sengketa</option>
+            <option value="__manual__">Isi jabatan secara manual</option>
+          </select>
+          <input id="kasiPosition" type="text" placeholder="Ketik jabatan penanda tangan" aria-label="Jabatan penanda tangan manual" hidden style="margin-top:8px;">
+        </div>
+        <div>
+          <label for="excelFile">Upload file Excel DI305, DI301A, atau DI208</label>
+          <div id="uploadZone" class="upload-zone">
+            <div class="upload-icon">⇧</div>
+            <div class="upload-copy"><strong>Klik atau tarik file Excel ke sini</strong><span id="fileNameText">Format .xlsx atau .xls</span></div>
+            <input id="excelFile" type="file" accept=".xlsx,.xls">
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-toolbar">
+        <div class="actions">
+          <button id="processBtn" class="primary" type="button">Proses &amp; Analisis</button>
+          <button id="downloadBtn" class="secondary" type="button" disabled>Download Excel</button>
+          <button id="downloadCustomBtn" class="secondary" type="button" disabled>Download MAK Custom</button>
+        </div>
+        <span class="small">Data diproses lokal di browser dan tidak dikirim ke server.</span>
+      </div>
+      <div id="message" class="message"></div>
+      <p class="small">Aplikasi mengenali variasi nama kolom DI305, DI301A, dan DI208. Minimal tersedia kolom nama pemohon/pihak dan jenis permohonan/layanan/kegiatan.</p>
+    </section>
+
+    <section id="preview" class="panel hidden">
+      <div class="panel-heading">
+        <div><h2>Dashboard Hasil Analisis</h2><p>Klik angka pada kartu atau tabel untuk membuka rincian data.</p></div>
+        <span class="step-badge">LANGKAH 2</span>
+      </div>
+      <div class="quick-nav">
+        <button type="button" data-scroll-target="currentYearSection">Tahun Berjalan</button>
+        <button type="button" data-scroll-target="previousYearSection">Tahun Sebelumnya</button>
+        <button type="button" data-scroll-target="unclassifiedDetails">Tidak Terklasifikasi</button>
+        <button type="button" data-scroll-target="customPanel">MAK Custom</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>Data Terbaca</span><strong id="readCount">0</strong></div>
+        <div class="stat current"><span>Tahun Berjalan</span><strong id="currentCount">0</strong></div>
+        <div class="stat previous"><span>Tahun Sebelumnya</span><strong id="previousCount">0</strong></div>
+        <div class="stat unmapped"><span>Tidak Terklasifikasi</span><strong id="unmappedCount">0</strong></div>
+        <div class="stat period"><span>Periode</span><strong id="periodText">-</strong></div>
+        <div class="stat sheets"><span>Sheet Dibuat</span><strong id="sheetCount">0</strong></div>
+      </div>
+      <div id="monthPanel" class="hidden">
+        <label>Filter Bulan Pencairan</label>
+        <div id="monthFilter" class="month-filter"></div>
+      </div>
+      <div class="table-wrap">
+        <div id="summaryTable"></div>
+      </div>
+      <details id="unclassifiedDetails" class="hidden">
+        <summary>Detail Tidak Terklasifikasi</summary>
+        <div class="detail-body">
+          <div class="table-wrap">
+            <table id="unclassifiedTable"></table>
+          </div>
+          <p class="small">Klasifikasi manual disimpan di browser ini dan akan dipakai lagi saat file diproses ulang.</p>
+        </div>
+      </details>
+      <div id="customPanel" class="custom-panel hidden">
+        <label>MAK Custom / Di Luar Klasifikasi Tetap</label>
+        <div class="table-wrap">
+          <table id="customTable"></table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="detailModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="detailTitle">Detail Data</h2>
+        <button id="closeDetailBtn" class="icon-button" type="button" aria-label="Tutup dialog">×</button>
+      </div>
+      <div class="detail-actionbar">
+        <span id="extensionStatus" class="extension-status">Ekstensi belum terpasang</span>
+        <div class="actions">
+          <button id="checkBidangBtn" class="primary hidden" type="button">Cek Jumlah Bidang</button>
+          <div id="downloadSplit" class="split-download">
+            <button id="downloadDetailBtn" class="secondary" type="button" title="Mengunduh data sesuai tampilan dialog.">Download</button>
+            <button id="downloadMenuBtn" class="secondary download-menu-toggle" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Pilihan download">▾</button>
+            <div id="downloadMenu" class="download-menu hidden" role="menu">
+              <button id="downloadFullDetailBtn" type="button" role="menuitem" title="Mengunduh seluruh kolom sumber DI305 ditambah hasil jumlah bidang.">Download Lengkap</button>
+              <button id="downloadFailedBtn" type="button" role="menuitem">Download Data Gagal</button>
+            </div>
+          </div>
+          <div class="overflow-wrap">
+            <button id="overflowMenuBtn" class="icon-button" type="button" aria-label="Menu lainnya" aria-expanded="false">⋮</button>
+            <div id="overflowMenu" class="overflow-menu hidden">
+              <button id="extensionHelpBtn" type="button">Panduan ekstensi</button>
+              <button id="retryFailedBtn" type="button">Ulangi data gagal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="extensionGuideBanner" class="extension-guide-banner hidden">
+        <h3>Ekstensi diperlukan untuk pengecekan otomatis</h3>
+        <p id="extensionBrowserMessage">Gunakan Google Chrome atau Microsoft Edge, unduh paket ekstensi, lalu pasang folder hasil ekstraknya.</p>
+        <div class="actions">
+          <a href="extension.zip" download>Unduh Ekstensi</a>
+          <button id="openExtensionsBtn" class="secondary" type="button">Buka Halaman Ekstensi</button>
+          <button id="showExtensionGuideBtn" class="secondary" type="button">Lihat Cara Pasang</button>
+        </div>
+      </div>
+      <div id="detailBody" class="modal-body"></div>
+    </div>
+  </div>
+
+  <div id="extensionGuideModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="extensionGuideTitle">
+    <div class="modal" style="max-width:760px;">
+      <div class="modal-head">
+        <h2 id="extensionGuideTitle">Panduan Memasang Ekstensi</h2>
+        <button id="closeExtensionGuideBtn" class="icon-button" type="button" aria-label="Tutup panduan">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="guide-callout"><strong>Penting:</strong> ekstrak file ZIP terlebih dahulu. Saat memilih ekstensi di Chrome/Edge, pilih <strong>folder extension</strong>, bukan file manifest.json, background.js, atau content.js di dalamnya.</div>
+        <ol class="guide-steps">
+          <li>Klik <strong>Unduh Ekstensi</strong>, lalu ekstrak file <strong>extension.zip</strong> ke sebuah folder.</li>
+          <li>Klik <strong>Buka Halaman Ekstensi</strong>. Jika browser tidak membukanya otomatis, alamat sudah disalin—tempelkan ke address bar lalu tekan Enter.</li>
+          <li>Aktifkan <strong>Developer mode / Mode developer</strong>.</li>
+          <li>Klik <strong>Load unpacked / Muat yang belum dipaketkan</strong>.</li>
+          <li>Pilih <strong>folder extension hasil ekstrak</strong>. Pada jendela pemilih folder, file di dalam folder memang tidak terlihat; cukup klik <strong>Select Folder</strong>.</li>
+          <li>Buka <strong>Details</strong> ekstensi dan aktifkan <strong>Allow access to file URLs / Izinkan akses ke URL file</strong>.</li>
+          <li>Muat ulang aplikasi. Status akan berubah menjadi <strong>Ekstensi terpasang</strong>.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div id="aboutModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+    <div class="modal" style="max-width:720px;">
+      <div class="modal-head">
+        <div><h2 id="aboutTitle">Tentang Aplikasi</h2><p class="small" style="margin:4px 0 0;">Versi 6.0</p></div>
+        <button id="closeAboutBtn" class="icon-button" type="button" aria-label="Tutup informasi aplikasi">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="small" style="margin-top:0;">Aplikasi Daftar Nominatif Pencairan membantu menyiapkan rekap dan eviden layanan pertanahan dari data Excel.</p>
+        <div class="about-list">
+          <div class="about-item"><strong>Pengolahan data</strong><span>Membaca Excel pendapatan harian, mengelompokkan layanan ke MAK dan sublayanan, serta menampilkan status berkas.</span></div>
+          <div class="about-item"><strong>Periode dan monitoring</strong><span>Memfilter data per bulan, merangkum tahun berjalan, dan memantau backlog tahun sebelumnya.</span></div>
+          <div class="about-item"><strong>Eviden pencairan</strong><span>Menyusun daftar nominatif, ringkasan volume, dan file Excel siap diunduh.</span></div>
+          <div class="about-item"><strong>Pemecahan Bidang</strong><span>Khusus sublayanan Pemecahan Bidang, aplikasi dapat memperoleh jumlah bidang melalui ekstensi setelah pengguna login ke ATR/BPN.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="toastStack" class="toast-stack" aria-live="polite"></div>
+
+  <script>
+    const MAK_DEFINITIONS = [
+      {
+        code: '6415.BAH.001',
+        short: '6415BAH001',
+        cover: 'COVER 6415.BAH.001',
+        name: 'Surat Keputusan Penetapan Hak Atas Tanah Perorangan dan Badan Hukum',
+        subservices: [
+          'Permohonan SK Pemberian Hak Dengan Konstatasi',
+          'Permohonan SK Pemberian Hak Guna Bangunan Badan Hukum',
+          'Permohonan SK Pemberian Hak Guna Bangunan Perorangan',
+          'Permohonan SK Pemberian Hak Milik Perorangan',
+          'Permohonan SK Perpanjangan Hak Guna Bangunan Badan Hukum'
+        ]
+      },
+      {
+        code: '7973.BAB.001',
+        short: '7973BAB001',
+        cover: 'COVER 7973.BAB.001',
+        name: 'Surat Keputusan Penetapan Hak Atas Tanah Instansi Pemerintah, BUMN dan BUMD',
+        subservices: [
+          'Permohonan SK Pemberian Hak Guna Bangunan Instansi/Badan Usaha Pemerintah',
+          'Permohonan SK Pemberian Hak Pakai Instansi/Badan Usaha Pemerintah'
+        ]
+      },
+      {
+        code: '7971.BAH.001',
+        short: '001',
+        cover: 'COVER 001',
+        name: 'Layanan Pendaftaran Tanah Pertama Kali',
+        subservices: [
+          'Pendaftaran SK Perpanjangan/Pembaruan Hak',
+          'Pendaftaran SK Hak',
+          'Pendaftaran Tanah Pertama Kali Penegasan Tanah Wakaf',
+          'Pendaftaran Tanah Pertama Kali Pengakuan/Penegasan Hak'
+        ]
+      },
+      {
+        code: '7971.BAH.002',
+        short: '002',
+        cover: 'COVER 002',
+        name: 'Layanan Informasi SKPT',
+        subservices: []
+      },
+      {
+        code: '7971.BAH.003',
+        short: '003',
+        cover: 'COVER 003',
+        name: 'Layanan Pengecekan SHAT',
+        subservices: []
+      },
+      {
+        code: '7971.BAH.004',
+        short: '004',
+        cover: 'COVER 004',
+        name: 'Layanan Pemecahan SHAT',
+        subservices: ['Penggabungan Bidang', 'Pemisahan Bidang', 'Pemecahan Bidang']
+      },
+      {
+        code: '7971.BAH.005',
+        short: '005',
+        cover: 'COVER 005',
+        name: 'Layanan Pemeliharaan Data Pertanahan',
+        subservices: [
+          'Ganti Nama',
+          'Ganti Nadzir',
+          'Hak Tanggungan',
+          'Hapusnya Hak',
+          'Penataan Batas',
+          'Pencatatan Perubahan Penggunaan Tanah',
+          'Pengangkatan Sita',
+          'Peralihan Hak - Hibah',
+          'Peralihan Hak - Jual Beli',
+          'Peralihan Hak - Lelang',
+          'Peralihan Hak - Pembagian Hak Bersama',
+          'Peralihan Hak - Pewarisan',
+          'Roya',
+          'Sertipikat Pengganti Karena Blanko Lama',
+          'Sertipikat Pengganti Karena Rusak',
+          'Sita',
+          'Blokir'
+        ]
+      },
+      {
+        code: '7971.BAH.006',
+        short: '006',
+        cover: 'COVER 006',
+        name: 'Layanan Sumpah Sertipikat Hilang',
+        subservices: []
+      },
+      {
+        code: '7971.ADI.003',
+        short: 'ADI003',
+        cover: 'COVER ADI003',
+        name: 'Sertifikasi Pejabat Pembuat Akta Tanah',
+        subservices: []
+      }
+    ];
+
+    const BASE_STATUSES = ['Selesai', 'Diproses', 'Ditutup', 'Ditunda', 'Diserahkan'];
+    const MONTHS = ['JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI', 'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'];
+    const MANUAL_STORAGE_KEY = 'daftarNominatifManualMappings';
+    const BIDANG_STORAGE_KEY = 'daftarNominatifJumlahBidang';
+    const EXTENSION_APP_SOURCE = 'DAFTAR_NOMINATIF_APP';
+    const EXTENSION_SOURCE = 'DAFTAR_NOMINATIF_EXTENSION';
+    const appState = {
+      allRecords: [],
+      processed: null,
+      outputWorkbook: null,
+      outputFileName: '',
+      customWorkbook: null,
+      customFileName: '',
+      selectedMonths: new Set(),
+      availableMonths: [],
+      detailSets: [],
+      currentDetail: null,
+      manualMappings: loadManualMappings(),
+      bidangResults: loadBidangResults(),
+      extensionReady: false,
+      activeBidangRequest: null
+    };
+
+    const els = {
+      file: document.getElementById('excelFile'),
+      kasiName: document.getElementById('kasiName'),
+      kasiNip: document.getElementById('kasiNip'),
+      kasiPosition: document.getElementById('kasiPosition'),
+      positionTemplate: document.getElementById('positionTemplate'),
+      processBtn: document.getElementById('processBtn'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      downloadCustomBtn: document.getElementById('downloadCustomBtn'),
+      message: document.getElementById('message'),
+      preview: document.getElementById('preview'),
+      readCount: document.getElementById('readCount'),
+      currentCount: document.getElementById('currentCount'),
+      previousCount: document.getElementById('previousCount'),
+      uploadZone: document.getElementById('uploadZone'),
+      fileNameText: document.getElementById('fileNameText'),
+      unmappedCount: document.getElementById('unmappedCount'),
+      periodText: document.getElementById('periodText'),
+      sheetCount: document.getElementById('sheetCount'),
+      monthPanel: document.getElementById('monthPanel'),
+      monthFilter: document.getElementById('monthFilter'),
+      summaryTable: document.getElementById('summaryTable'),
+      unclassifiedDetails: document.getElementById('unclassifiedDetails'),
+      unclassifiedTable: document.getElementById('unclassifiedTable'),
+      customPanel: document.getElementById('customPanel'),
+      customTable: document.getElementById('customTable'),
+      detailModal: document.getElementById('detailModal'),
+      detailTitle: document.getElementById('detailTitle'),
+      detailBody: document.getElementById('detailBody'),
+      downloadDetailBtn: document.getElementById('downloadDetailBtn'),
+      downloadFullDetailBtn: document.getElementById('downloadFullDetailBtn'),
+      checkBidangBtn: document.getElementById('checkBidangBtn'),
+      extensionStatus: document.getElementById('extensionStatus'),
+      extensionHelpBtn: document.getElementById('extensionHelpBtn'),
+      extensionGuideBanner: document.getElementById('extensionGuideBanner'),
+      extensionBrowserMessage: document.getElementById('extensionBrowserMessage'),
+      openExtensionsBtn: document.getElementById('openExtensionsBtn'),
+      showExtensionGuideBtn: document.getElementById('showExtensionGuideBtn'),
+      extensionGuideModal: document.getElementById('extensionGuideModal'),
+      closeExtensionGuideBtn: document.getElementById('closeExtensionGuideBtn'),
+      downloadMenuBtn: document.getElementById('downloadMenuBtn'),
+      downloadMenu: document.getElementById('downloadMenu'),
+      downloadFailedBtn: document.getElementById('downloadFailedBtn'),
+      retryFailedBtn: document.getElementById('retryFailedBtn'),
+      overflowMenuBtn: document.getElementById('overflowMenuBtn'),
+      overflowMenu: document.getElementById('overflowMenu'),
+      closeDetailBtn: document.getElementById('closeDetailBtn'),
+      appVersionBtn: document.getElementById('appVersionBtn'),
+      aboutModal: document.getElementById('aboutModal'),
+      closeAboutBtn: document.getElementById('closeAboutBtn')
+    };
+
+    els.processBtn.addEventListener('click', processFile);
+    els.positionTemplate.addEventListener('change', handlePositionTemplateChange);
+    els.downloadBtn.addEventListener('click', downloadWorkbook);
+    els.downloadCustomBtn.addEventListener('click', downloadCustomWorkbook);
+    els.monthFilter.addEventListener('change', handleMonthChange);
+    els.unclassifiedTable.addEventListener('click', handleDetailClick);
+    els.unclassifiedTable.addEventListener('click', handleManualClassification);
+    els.unclassifiedTable.addEventListener('input', handleUnclassifiedFormChange);
+    els.unclassifiedTable.addEventListener('change', handleUnclassifiedFormChange);
+    els.summaryTable.addEventListener('click', handleDetailClick);
+    els.customTable.addEventListener('click', handleDetailClick);
+    els.customTable.addEventListener('click', handleCustomRelease);
+    els.closeDetailBtn.addEventListener('click', closeDetailModal);
+    els.downloadDetailBtn.addEventListener('click', downloadVisibleDetail);
+    els.downloadFullDetailBtn.addEventListener('click', downloadFullDetail);
+    els.downloadFailedBtn.addEventListener('click', downloadFailedDetail);
+    els.checkBidangBtn.addEventListener('click', startBidangCheck);
+    els.retryFailedBtn.addEventListener('click', retryFailedBidang);
+    els.extensionHelpBtn.addEventListener('click', openExtensionGuide);
+    els.showExtensionGuideBtn.addEventListener('click', openExtensionGuide);
+    els.closeExtensionGuideBtn.addEventListener('click', closeExtensionGuide);
+    els.openExtensionsBtn.addEventListener('click', openBrowserExtensionsPage);
+    els.appVersionBtn.addEventListener('click', () => els.aboutModal.classList.remove('hidden'));
+    els.closeAboutBtn.addEventListener('click', () => els.aboutModal.classList.add('hidden'));
+    els.downloadMenuBtn.addEventListener('click', event => {
+      event.stopPropagation();
+      const open = els.downloadMenu.classList.toggle('hidden') === false;
+      els.downloadMenuBtn.setAttribute('aria-expanded', String(open));
+    });
+    els.overflowMenuBtn.addEventListener('click', event => {
+      event.stopPropagation();
+      const open = els.overflowMenu.classList.toggle('hidden') === false;
+      els.overflowMenuBtn.setAttribute('aria-expanded', String(open));
+    });
+    document.addEventListener('click', event => {
+      if (!event.target.closest('#downloadSplit')) closeDownloadMenu();
+      if (!event.target.closest('.overflow-wrap')) closeOverflowMenu();
+    });
+    els.detailModal.addEventListener('click', event => {
+      if (event.target === els.detailModal) closeDetailModal();
+    });
+    els.extensionGuideModal.addEventListener('click', event => {
+      if (event.target === els.extensionGuideModal) closeExtensionGuide();
+    });
+    els.aboutModal.addEventListener('click', event => {
+      if (event.target === els.aboutModal) els.aboutModal.classList.add('hidden');
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !els.aboutModal.classList.contains('hidden')) els.aboutModal.classList.add('hidden');
+    });
+    window.addEventListener('message', handleExtensionMessage);
+    pingExtension();
+    setInterval(pingExtension, 3000);
+
+    function handlePositionTemplateChange() {
+      const selected = els.positionTemplate.value;
+      const manual = selected === '__manual__';
+      els.kasiPosition.hidden = !manual;
+      if (manual) {
+        els.kasiPosition.value = '';
+        els.kasiPosition.focus();
+      } else {
+        els.kasiPosition.value = selected;
+      }
+    }
+
+    els.file.addEventListener('change', () => {
+      const file = els.file.files[0];
+      els.fileNameText.textContent = file ? file.name : 'Format .xlsx atau .xls';
+    });
+    ['dragenter', 'dragover'].forEach(type => els.uploadZone.addEventListener(type, event => {
+      event.preventDefault();
+      els.uploadZone.classList.add('dragover');
+    }));
+    ['dragleave', 'drop'].forEach(type => els.uploadZone.addEventListener(type, event => {
+      event.preventDefault();
+      els.uploadZone.classList.remove('dragover');
+    }));
+    els.uploadZone.addEventListener('drop', event => {
+      const file = event.dataTransfer.files && event.dataTransfer.files[0];
+      if (!file) return;
+      const transfer = new DataTransfer();
+      transfer.items.add(file);
+      els.file.files = transfer.files;
+      els.file.dispatchEvent(new Event('change'));
+    });
+    document.addEventListener('click', event => {
+      const button = event.target.closest('[data-scroll-target]');
+      if (!button) return;
+      const target = document.getElementById(button.dataset.scrollTarget);
+      if (target && !target.classList.contains('hidden')) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    function normalizeKey(value) {
+      return String(value || '').toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+    }
+
+    function cleanText(value) {
+      return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function findColumnIndex(header, aliases) {
+      const exact = header.findIndex(cell => aliases.includes(cell));
+      if (exact >= 0) return exact;
+      return header.findIndex(cell => aliases.some(alias => alias.length >= 5 && cell.includes(alias)));
+    }
+
+    function containsAny(source, keywords) {
+      return keywords.some(keyword => source.includes(keyword.toLowerCase()));
+    }
+
+    function loadManualMappings() {
+      try {
+        return JSON.parse(localStorage.getItem(MANUAL_STORAGE_KEY) || '{}');
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function saveManualMappings() {
+      localStorage.setItem(MANUAL_STORAGE_KEY, JSON.stringify(appState.manualMappings));
+    }
+
+    function getManualMapping(jenisPermohonan) {
+      return appState.manualMappings[normalizeManualKey(jenisPermohonan)] || null;
+    }
+
+    function normalizeManualKey(value) {
+      return cleanText(value).toLowerCase();
+    }
+
+    function monthKeyFromDate(date) {
+      if (!date) return '';
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function monthLabelFromKey(key) {
+      const [year, month] = key.split('-').map(Number);
+      return `${titleCase(MONTHS[month - 1])} ${year}`;
+    }
+
+    function getAvailableMonths(records) {
+      const keys = Array.from(new Set(records.map(row => row.monthKey).filter(Boolean)));
+      return keys.sort();
+    }
+
+    function areMonthsContiguous(keys) {
+      const sorted = [...keys].sort();
+      if (sorted.length <= 1) return true;
+      const indexes = sorted.map(key => {
+        const [year, month] = key.split('-').map(Number);
+        return year * 12 + month;
+      });
+      for (let i = 1; i < indexes.length; i++) {
+        if (indexes[i] - indexes[i - 1] !== 1) return false;
+      }
+      return true;
+    }
+
+    function classifyApplication(jenisPermohonan) {
+      const manual = getManualMapping(jenisPermohonan);
+      if (manual) return manual;
+
+      const text = cleanText(jenisPermohonan).toLowerCase();
+      if (!text) return null;
+
+      // Layanan yang memuat "Konversi" merupakan Program Sertipikasi PTSL ASN
+      // Kategori 2, sehingga tidak dimasukkan ke MAK 7971.BAH.001.
+      if (text.includes('konversi')) return null;
+
+      if (containsAny(text, ['ppat', 'pejabat pembuat akta tanah', 'pelantikan ppat'])) return service('7971.ADI.003');
+      if (containsAny(text, ['sumpah', 'sertipikat hilang', 'karena hilang'])) return service('7971.BAH.006');
+      if (containsAny(text, ['skpt', 'surat keterangan pendaftaran tanah'])) return service('7971.BAH.002');
+      if (containsAny(text, ['pengecekan'])) return service('7971.BAH.003');
+
+      if (containsAny(text, ['hak guna bangunan instansi', 'hak guna bangunan badan usaha pemerintah'])) {
+        return service('7973.BAB.001', 'Permohonan SK Pemberian Hak Guna Bangunan Instansi/Badan Usaha Pemerintah');
+      }
+      if (containsAny(text, ['hak pakai instansi', 'hak pakai badan usaha pemerintah'])) {
+        return service('7973.BAB.001', 'Permohonan SK Pemberian Hak Pakai Instansi/Badan Usaha Pemerintah');
+      }
+      if (containsAny(text, [
+        'surat keputusan penetapan hak atas tanah instansi pemerintah',
+        'penetapan hak atas tanah instansi pemerintah',
+        'penetapan hak instansi pemerintah',
+        'penetapan hak bumn',
+        'penetapan hak bumd'
+      ])) return service('7973.BAB.001');
+
+      if (text.includes('konstatasi')) {
+        return service('6415.BAH.001', 'Permohonan SK Pemberian Hak Dengan Konstatasi');
+      }
+      if (containsAny(text, ['perpanjangan hak guna bangunan badan hukum', 'perpanjangan hgb badan hukum'])) {
+        return service('6415.BAH.001', 'Permohonan SK Perpanjangan Hak Guna Bangunan Badan Hukum');
+      }
+      if (containsAny(text, ['hak guna bangunan badan hukum', 'hgb badan hukum'])) {
+        return service('6415.BAH.001', 'Permohonan SK Pemberian Hak Guna Bangunan Badan Hukum');
+      }
+      if (containsAny(text, ['hak guna bangunan perorangan', 'hgb perorangan'])) {
+        return service('6415.BAH.001', 'Permohonan SK Pemberian Hak Guna Bangunan Perorangan');
+      }
+      if (containsAny(text, ['hak milik perorangan', 'pemberian hak milik'])) {
+        return service('6415.BAH.001', 'Permohonan SK Pemberian Hak Milik Perorangan');
+      }
+      if (containsAny(text, [
+        'surat keputusan penetapan hak atas tanah perorangan',
+        'penetapan hak atas tanah perorangan',
+        'penetapan hak perorangan',
+        'penetapan hak atas tanah badan hukum',
+        'penetapan hak badan hukum'
+      ])) return service('6415.BAH.001');
+
+      if (containsAny(text, ['penggabungan'])) return service('7971.BAH.004', 'Penggabungan Bidang');
+      if (containsAny(text, ['pemisahan'])) return service('7971.BAH.004', 'Pemisahan Bidang');
+      if (containsAny(text, ['pemecahan'])) return service('7971.BAH.004', 'Pemecahan Bidang');
+
+      if (containsAny(text, ['penegasan tanah wakaf', 'tanah wakaf'])) {
+        return service('7971.BAH.001', 'Pendaftaran Tanah Pertama Kali Penegasan Tanah Wakaf');
+      }
+      if (containsAny(text, ['pengakuan hak', 'pengakuan/penegasan', 'penegasan hak'])) {
+        return service('7971.BAH.001', 'Pendaftaran Tanah Pertama Kali Pengakuan/Penegasan Hak');
+      }
+      if (containsAny(text, ['pendaftaran sk perpanjangan', 'pendaftaran sk pembaruan', 'perpanjangan/pembaruan hak'])) {
+        return service('7971.BAH.001', 'Pendaftaran SK Perpanjangan/Pembaruan Hak');
+      }
+      if (containsAny(text, ['pendaftaran sk hak'])) {
+        return service('7971.BAH.001', 'Pendaftaran SK Hak');
+      }
+
+      if (containsAny(text, ['pengangkatan sita'])) return service('7971.BAH.005', 'Pengangkatan Sita');
+      if (containsAny(text, ['ganti nama'])) return service('7971.BAH.005', 'Ganti Nama');
+      if (containsAny(text, ['ganti nadzir', 'ganti nazir', 'pergantian nadzir', 'pergantian nazir'])) return service('7971.BAH.005', 'Ganti Nadzir');
+      if (containsAny(text, ['hak tanggungan'])) return service('7971.BAH.005', 'Hak Tanggungan');
+      if (containsAny(text, ['hapusnya hak'])) return service('7971.BAH.005', 'Hapusnya Hak');
+      if (containsAny(text, ['penataan batas'])) return service('7971.BAH.005', 'Penataan Batas');
+      if (containsAny(text, ['perubahan penggunaan tanah'])) return service('7971.BAH.005', 'Pencatatan Perubahan Penggunaan Tanah');
+      if (containsAny(text, ['hibah'])) return service('7971.BAH.005', 'Peralihan Hak - Hibah');
+      if (containsAny(text, ['jual beli'])) return service('7971.BAH.005', 'Peralihan Hak - Jual Beli');
+      if (containsAny(text, ['lelang'])) return service('7971.BAH.005', 'Peralihan Hak - Lelang');
+      if (containsAny(text, ['pembagian hak bersama', 'phb'])) return service('7971.BAH.005', 'Peralihan Hak - Pembagian Hak Bersama');
+      if (containsAny(text, ['waris', 'pewarisan'])) return service('7971.BAH.005', 'Peralihan Hak - Pewarisan');
+      if (containsAny(text, ['roya'])) return service('7971.BAH.005', 'Roya');
+      if (containsAny(text, ['blanko lama'])) return service('7971.BAH.005', 'Sertipikat Pengganti Karena Blanko Lama');
+      if (containsAny(text, ['rusak'])) return service('7971.BAH.005', 'Sertipikat Pengganti Karena Rusak');
+      if (containsAny(text, ['sita'])) return service('7971.BAH.005', 'Sita');
+      if (containsAny(text, ['blokir'])) return service('7971.BAH.005', 'Blokir');
+
+      return null;
+    }
+
+    function service(code, subservice = '') {
+      const def = MAK_DEFINITIONS.find(item => item.code === code);
+      return { code, name: def.name, short: def.short, subservice };
+    }
+
+    function customService(code, name) {
+      return {
+        code: cleanText(code).toUpperCase(),
+        name: cleanText(name) || cleanText(code).toUpperCase(),
+        short: cleanText(code).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(-8) || 'CUSTOM',
+        subservice: '',
+        custom: true
+      };
+    }
+
+    function extractNomorBerkas(statusBerkas) {
+      const match = cleanText(statusBerkas).match(/\d+\s*\/\s*\d{4}/);
+      return match ? match[0].replace(/\s+/g, '') : '';
+    }
+
+    function extractBerkasYear(nomorBerkas) {
+      const match = cleanText(nomorBerkas).match(/\/\s*(\d{4})(?:\D|$)/);
+      return match ? Number(match[1]) : null;
+    }
+
+    function extractStatus(statusBerkas) {
+      let text = cleanText(statusBerkas).replace(/\d+\s*\/\s*\d{4}/, '').trim();
+      const upper = text.toUpperCase();
+      if (!upper) return 'Status Lain';
+      if (upper.includes('SELESAI')) return 'Selesai';
+      if (upper.includes('DIPROSES') || upper === 'PROSES' || upper.includes('PROSES')) return 'Diproses';
+      if (upper.includes('DITUTUP') || upper === 'TUTUP' || upper.includes('TUTUP')) return 'Ditutup';
+      if (upper.includes('DITUNDA') || upper.includes('TUNDA')) return 'Ditunda';
+      if (upper.includes('DISERAHKAN')) return 'Diserahkan';
+      return titleCase(text);
+    }
+
+    function titleCase(value) {
+      return cleanText(value).toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function parseDate(value, yearHint = '') {
+      if (value instanceof Date && !isNaN(value)) return value;
+      if (typeof value === 'number') {
+        const parsed = XLSX.SSF.parse_date_code(value);
+        return parsed ? new Date(parsed.y, parsed.m - 1, parsed.d) : null;
+      }
+      const text = cleanText(value);
+      if (!text) return null;
+      const match = text.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{1,4})/);
+      if (match) {
+        let year = Number(match[3]);
+        const hintedYear = Number(cleanText(yearHint));
+        if (hintedYear >= 1900 && hintedYear <= 2200 && match[3].length < 4) year = hintedYear;
+        else if (match[3].length === 3 && match[3].startsWith('0')) year = 2000 + Number(match[3].slice(-2));
+        else if (year < 100) year += 2000;
+        return new Date(year, Number(match[2]) - 1, Number(match[1]));
+      }
+      const date = new Date(text);
+      return isNaN(date) ? null : date;
+    }
+
+    function getPeriod(records) {
+      const dates = records.map(row => row.date).filter(Boolean).sort((a, b) => a - b);
+      if (!dates.length) {
+        const year = new Date().getFullYear();
+        return {
+          label: `PERIODE BULAN ........ TAHUN ${year}`,
+          shortLabel: `........ ${year}`,
+          filePeriod: `Periode_${year}`,
+          year,
+          months: '........'
+        };
+      }
+
+      const monthKeys = Array.from(new Set(dates.map(monthKeyFromDate))).sort();
+      const years = Array.from(new Set(monthKeys.map(key => key.slice(0, 4))));
+      const year = years.length === 1 ? years[0] : `${years[0]}-${years[years.length - 1]}`;
+      const firstKey = monthKeys[0];
+      const lastKey = monthKeys[monthKeys.length - 1];
+      const firstMonth = MONTHS[Number(firstKey.slice(5, 7)) - 1];
+      const lastMonth = MONTHS[Number(lastKey.slice(5, 7)) - 1];
+      const months = firstKey === lastKey ? firstMonth : `${firstMonth}-${lastMonth}`;
+      const displayMonths = months.split('-').map(titleCase).join('-');
+
+      return {
+        label: `PERIODE BULAN ${months} TAHUN ${year}`,
+        shortLabel: `${displayMonths} ${year}`,
+        filePeriod: `${displayMonths.replace(/\s+/g, '_')}_${year}`,
+        year,
+        months
+      };
+    }
+
+    async function processFile() {
+      clearMessage();
+      const file = els.file.files[0];
+      if (!file) return showMessage('Silakan pilih file Excel terlebih dahulu.', 'error');
+      if (!/\.(xlsx|xls)$/i.test(file.name)) return showMessage('File ditolak. Gunakan file Excel dengan ekstensi .xlsx atau .xls.', 'error');
+
+      const originalProcessText = els.processBtn.textContent;
+      els.processBtn.disabled = true;
+      els.processBtn.textContent = 'Menganalisis...';
+      els.downloadBtn.disabled = true;
+      els.downloadCustomBtn.disabled = true;
+      appState.outputWorkbook = null;
+      appState.customWorkbook = null;
+
+      try {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+        const source = readSourceRows(workbook);
+        appState.allRecords = buildAllRecords(source.rows, source.columns, source.headers, source.headerRowIndex);
+        appState.availableMonths = getAvailableMonths(appState.allRecords);
+        appState.selectedMonths = new Set(appState.availableMonths);
+        renderMonthFilter();
+        refreshProcessedView();
+        els.downloadBtn.disabled = false;
+        const detected = source.detectedFormat ? ` (format ${source.detectedFormat})` : '';
+        showMessage(`Berhasil memproses ${appState.allRecords.length} baris data dari sheet "${source.sheetName}"${detected}.`, 'success');
+      } catch (error) {
+        console.error(error);
+        showMessage(error.message || 'Terjadi kesalahan saat memproses file.', 'error');
+      } finally {
+        els.processBtn.disabled = false;
+        els.processBtn.textContent = originalProcessText;
+      }
+    }
+
+    function readSourceRows(workbook) {
+      const aliases = {
+        applicant: ['namapemohon', 'pemohon', 'namapihak', 'namapenerima', 'pemeganghak', 'namawajibbayar', 'nama'],
+        type: ['jenispermohonan', 'jenislayanan', 'namalayanan', 'pelayanan', 'jenispelayanan', 'sifatperalihanhak', 'kegiatan', 'uraiankegiatan', 'jenispekerjaan', 'permohonan'],
+        status: ['statusberkas', 'statuspermohonan', 'keterangan', 'status', 'progres', 'progress'],
+        date: ['tanggal', 'tanggalpermohonan', 'tanggaldaftar', 'tanggalmasuk', 'tanggalpenerimaan', 'tanggalbayar', 'tanggalkegiatan'],
+        year: ['tahun'],
+        number: ['nomorberkas', 'noberkas', 'nomorpermohonan', 'nopermohonan', 'nomordi301', 'berkas']
+      };
+
+      let bestCandidate = null;
+
+      for (const sheetName of workbook.SheetNames) {
+        const sheet = workbook.Sheets[sheetName];
+        const matrix = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: '' });
+        const limit = Math.min(matrix.length, 50);
+
+        for (let rowIndex = 0; rowIndex < limit; rowIndex++) {
+          const header = matrix[rowIndex].map(normalizeKey);
+          const columns = {};
+          Object.entries(aliases).forEach(([field, keys]) => {
+            columns[field] = findColumnIndex(header, keys);
+          });
+
+          // Nama pihak dan jenis layanan adalah dua informasi minimum untuk
+          // membuat daftar nominatif dan menentukan klasifikasi MAK.
+          if (columns.applicant >= 0 && columns.type >= 0) {
+            const score = Object.values(columns).filter(index => index >= 0).length;
+            const candidate = {
+              sheetName,
+              columns,
+              headers: matrix[rowIndex].map((value, index) => cleanText(value) || `Kolom ${index + 1}`),
+              rows: matrix.slice(rowIndex + 1),
+              headerRowIndex: rowIndex,
+              score,
+              detectedFormat: detectSourceFormat(sheetName, matrix, rowIndex)
+            };
+            if (!bestCandidate || candidate.score > bestCandidate.score) bestCandidate = candidate;
+          }
+        }
+      }
+
+      if (bestCandidate) return bestCandidate;
+      throw new Error('Data belum dapat dikenali. Pastikan ada kolom nama pemohon/pihak dan jenis permohonan/layanan/kegiatan.');
+    }
+
+    function detectSourceFormat(sheetName, matrix, headerRowIndex) {
+      const sample = [sheetName]
+        .concat(matrix.slice(Math.max(0, headerRowIndex - 8), headerRowIndex + 1).flat())
+        .map(cleanText).join(' ').toUpperCase();
+      if (/DI\s*301\s*A/.test(sample)) return 'DI301A';
+      if (/DI\s*208/.test(sample)) return 'DI208';
+      if (/DI\s*305|LAPORAN PENDAPATAN HARIAN/.test(sample)) return 'DI305';
+      return '';
+    }
+
+    function buildAllRecords(rows, columns, headers, headerRowIndex = 0) {
+      const records = [];
+
+      rows.forEach((row, rowIndex) => {
+        const applicant = cleanText(row[columns.applicant]);
+        const jenis = cleanText(row[columns.type]);
+        const statusCell = columns.status >= 0 ? row[columns.status] : '';
+        const numberCell = columns.number >= 0 ? row[columns.number] : '';
+        const statusRaw = cleanText([numberCell, statusCell].filter(Boolean).join(' '));
+        const tanggalRaw = columns.date >= 0 ? row[columns.date] : '';
+        const yearRaw = columns.year >= 0 ? row[columns.year] : '';
+        if (!applicant && !jenis && !statusRaw && !cleanText(tanggalRaw)) return;
+
+        const date = parseDate(tanggalRaw, yearRaw);
+        const classification = classifyApplication(jenis);
+        const nomorBerkas = extractNomorBerkas(statusCell) || extractNomorBerkas(numberCell) || cleanText(numberCell);
+        const berkasYear = extractBerkasYear(nomorBerkas);
+        const documentYear = date ? date.getFullYear() : (Number(yearRaw) || null);
+        const bidangSaved = appState.bidangResults[bidangKeyFromValues(nomorBerkas, berkasYear)];
+        records.push({
+          applicant,
+          jenis,
+          nomorBerkas,
+          berkasYear,
+          documentYear,
+          isDifferentBerkasYear: Boolean(berkasYear && documentYear && berkasYear !== documentYear),
+          status: cleanText(statusCell)
+            ? extractStatus(statusCell)
+            : /selesai|diproses|ditutup|ditunda|diserahkan/i.test(cleanText(numberCell))
+              ? extractStatus(numberCell)
+              : 'Status Tidak Tersedia',
+          date,
+          monthKey: monthKeyFromDate(date),
+          rawStatus: statusRaw,
+          code: classification ? classification.code : 'TIDAK TERKLASIFIKASI',
+          serviceName: classification ? classification.name : 'Tidak Terklasifikasi',
+          short: classification ? classification.short : 'UNK',
+          subservice: classification ? classification.subservice : '',
+          custom: Boolean(classification && classification.custom),
+          rawHeaders: headers,
+          rawRow: headers.map((_, index) => row[index] ?? ''),
+          sourceRowNumber: rowIndex + headerRowIndex + 2,
+          jumlahBidang: Number.isInteger(bidangSaved?.jumlahBidang) ? bidangSaved.jumlahBidang : null,
+          statusBidang: bidangSaved?.statusBidang || 'Belum diperiksa',
+          errorBidang: bidangSaved?.errorBidang || '',
+          checkedBidangAt: bidangSaved?.checkedAt || ''
+        });
+      });
+
+      return records;
+    }
+
+    function splitRecordsByBerkasYear(records) {
+      const current = [];
+      const differentYears = new Map();
+      records.forEach(row => {
+        if (!row.isDifferentBerkasYear || !row.berkasYear) {
+          current.push(row);
+          return;
+        }
+        if (!differentYears.has(row.berkasYear)) differentYears.set(row.berkasYear, []);
+        differentYears.get(row.berkasYear).push(row);
+      });
+      return {
+        current,
+        differentYears: new Map([...differentYears.entries()].sort((a, b) => b[0] - a[0]))
+      };
+    }
+
+    function buildProcessedData(records) {
+      const unclassified = records.filter(row => row.code === 'TIDAK TERKLASIFIKASI');
+      const customRecords = records.filter(row => row.custom);
+      const period = getPeriod(records);
+      const summary = summarize(records);
+      const currentYearRecords = records.filter(row => !row.isDifferentBerkasYear);
+      const previousYearRecords = records.filter(row => row.isDifferentBerkasYear);
+      return {
+        records,
+        unclassified,
+        customRecords,
+        period,
+        summary,
+        currentYearRecords,
+        previousYearRecords,
+        currentYearSummary: summarize(currentYearRecords),
+        previousYearSummary: summarize(previousYearRecords)
+      };
+    }
+
+    function getFilteredRecords() {
+      if (!appState.selectedMonths.size) return [];
+      return appState.allRecords.filter(row => !row.monthKey || appState.selectedMonths.has(row.monthKey));
+    }
+
+    function refreshProcessedView() {
+      const processed = buildProcessedData(getFilteredRecords());
+      const outputWorkbook = buildOutputWorkbook(processed);
+      const customWorkbook = buildCustomWorkbook(processed);
+
+      appState.processed = processed;
+      appState.outputWorkbook = outputWorkbook;
+      appState.outputFileName = `Daftar_Nominatif_Pencairan_${processed.period.filePeriod}.xlsx`;
+      appState.customWorkbook = customWorkbook;
+      appState.customFileName = `Ekstrak_MAK_Custom_${processed.period.filePeriod}.xlsx`;
+
+      renderPreview(processed, outputWorkbook.SheetNames.length);
+      els.downloadBtn.disabled = !processed.records.length;
+      els.downloadCustomBtn.disabled = !processed.customRecords.length;
+    }
+
+    function rebuildRecordsWithManualMappings() {
+      appState.allRecords = appState.allRecords.map(row => {
+        const classification = classifyApplication(row.jenis);
+        return {
+          ...row,
+          code: classification ? classification.code : 'TIDAK TERKLASIFIKASI',
+          serviceName: classification ? classification.name : 'Tidak Terklasifikasi',
+          short: classification ? classification.short : 'UNK',
+          subservice: classification ? classification.subservice : '',
+          custom: Boolean(classification && classification.custom)
+        };
+      });
+    }
+
+    function summarize(records) {
+      const statusSet = new Set(BASE_STATUSES);
+      records.forEach(row => {
+        if (!BASE_STATUSES.includes(row.status)) statusSet.add(row.status || 'Status Lain');
+      });
+      const statuses = Array.from(statusSet);
+
+      const emptyCounts = () => Object.fromEntries(statuses.map(status => [status, 0]));
+      const byMak = new Map();
+      const customByMak = new Map();
+
+      MAK_DEFINITIONS.forEach(def => {
+        byMak.set(def.code, {
+          code: def.code,
+          name: def.name,
+          count: 0,
+          statuses: emptyCounts(),
+          records: [],
+          sub: new Map()
+        });
+        def.subservices.forEach(sub => {
+          byMak.get(def.code).sub.set(sub, { name: sub, count: 0, statuses: emptyCounts(), records: [] });
+        });
+      });
+
+      byMak.set('TIDAK TERKLASIFIKASI', {
+        code: 'TIDAK TERKLASIFIKASI',
+        name: 'Tidak Terklasifikasi',
+        count: 0,
+        statuses: emptyCounts(),
+        records: [],
+        sub: new Map()
+      });
+
+      records.forEach(row => {
+        if (row.custom) {
+          if (!customByMak.has(row.code)) {
+            customByMak.set(row.code, {
+              code: row.code,
+              name: row.serviceName,
+              count: 0,
+              statuses: emptyCounts(),
+              records: []
+            });
+          }
+          const custom = customByMak.get(row.code);
+          custom.count++;
+          custom.statuses[row.status] = (custom.statuses[row.status] || 0) + 1;
+          custom.records.push(row);
+          return;
+        }
+
+        const bucket = byMak.get(row.code) || byMak.get('TIDAK TERKLASIFIKASI');
+        bucket.count++;
+        bucket.statuses[row.status] = (bucket.statuses[row.status] || 0) + 1;
+        bucket.records.push(row);
+        const subName = row.subservice || row.serviceName;
+        if (!bucket.sub.has(subName)) {
+          bucket.sub.set(subName, { name: subName, count: 0, statuses: emptyCounts(), records: [] });
+        }
+        const sub = bucket.sub.get(subName);
+        sub.count++;
+        sub.statuses[row.status] = (sub.statuses[row.status] || 0) + 1;
+        sub.records.push(row);
+      });
+
+      const grand = { count: records.length, statuses: emptyCounts(), records };
+      records.forEach(row => {
+        grand.statuses[row.status] = (grand.statuses[row.status] || 0) + 1;
+      });
+
+      return { statuses, byMak, customByMak, grand };
+    }
+
+    function renderMonthFilter() {
+      if (!appState.availableMonths.length) {
+        els.monthPanel.classList.add('hidden');
+        els.monthFilter.innerHTML = '';
+        return;
+      }
+
+      els.monthPanel.classList.remove('hidden');
+      els.monthFilter.innerHTML = appState.availableMonths.map(key => `
+        <label>
+          <input type="checkbox" value="${escapeHtml(key)}" ${appState.selectedMonths.has(key) ? 'checked' : ''}>
+          ${escapeHtml(monthLabelFromKey(key))}
+        </label>
+      `).join('');
+    }
+
+    function handleMonthChange() {
+      const checked = Array.from(els.monthFilter.querySelectorAll('input[type="checkbox"]:checked')).map(input => input.value);
+      if (!checked.length) {
+        showMessage('Pilih minimal satu bulan untuk pencairan.', 'error');
+        const first = els.monthFilter.querySelector('input[type="checkbox"]');
+        if (first) first.checked = true;
+        appState.selectedMonths = new Set(first ? [first.value] : []);
+      } else if (!areMonthsContiguous(checked)) {
+        showMessage('Periode pencairan harus berurutan. Pilih rentang bulan tanpa loncatan.', 'error');
+        renderMonthFilter();
+        return;
+      } else {
+        clearMessage();
+        appState.selectedMonths = new Set(checked);
+      }
+      refreshProcessedView();
+    }
+
+    function getRecordYear(row) {
+      return row.berkasYear || row.documentYear || 'TANPA TAHUN';
+    }
+
+    function groupRecordsByYear(records) {
+      const map = new Map();
+      records.forEach(row => {
+        const year = getRecordYear(row);
+        if (!map.has(year)) map.set(year, []);
+        map.get(year).push(row);
+      });
+      return new Map([...map.entries()].sort((a, b) => {
+        if (a[0] === 'TANPA TAHUN') return 1;
+        if (b[0] === 'TANPA TAHUN') return -1;
+        return Number(b[0]) - Number(a[0]);
+      }));
+    }
+
+    function renderPreview(processed, sheetCount) {
+      els.preview.classList.remove('hidden');
+      appState.detailSets = [];
+      els.readCount.textContent = processed.records.length;
+      els.currentCount.textContent = processed.currentYearRecords.length;
+      els.previousCount.textContent = processed.previousYearRecords.length;
+      els.unmappedCount.textContent = processed.unclassified.length;
+      els.periodText.textContent = processed.period.shortLabel;
+      els.sheetCount.textContent = sheetCount;
+
+      let html = '';
+      html += '<div id="currentYearSection"></div><h3 class="section-title current"><span class="section-dot"></span>REKAP TAHUN BERJALAN / DAPAT DICAIRKAN</h3>';
+      html += '<p class="small">Hanya memuat berkas yang tahun pada nomor berkasnya sama dengan kolom Tahun Rekapan Berkas Masuk.</p>';
+      html += renderSummaryTable(processed.currentYearSummary, 'Tahun Berjalan');
+
+      html += '<div id="previousYearSection"></div><h3 class="section-title previous"><span class="section-dot"></span>REKAP BERKAS TAHUN SEBELUMNYA</h3>';
+      html += '<p class="small">Berkas tetap ditampilkan untuk monitoring dan strategi penyelesaian, tetapi tidak masuk daftar nominatif pencairan tahun berjalan.</p>';
+      const previousGroups = groupRecordsByYear(processed.previousYearRecords);
+      if (!previousGroups.size) {
+        html += '<p class="small">Tidak ada berkas tahun sebelumnya pada periode yang dipilih.</p>';
+      } else {
+        previousGroups.forEach((records, year) => {
+          html += `<div class="year-block"><h4><span class="year-badge">${escapeHtml(year)}</span> KELOMPOK BERKAS TAHUN ${escapeHtml(year)}</h4>`;
+          html += renderSummaryTable(summarize(records), `Berkas Tahun ${year}`);
+          html += '</div>';
+        });
+      }
+
+      els.summaryTable.innerHTML = html;
+      renderUnclassifiedDetails(processed);
+      renderCustomSummary(processed);
+    }
+
+    function renderSummaryTable(summary, titlePrefix) {
+      const statuses = summary.statuses;
+      let html = '<div class="table-wrap"><table><thead><tr><th>Kode MAK</th><th>Kelompok Kegiatan / Sub Layanan</th><th>Jumlah</th>';
+      statuses.forEach(status => html += `<th>${escapeHtml(status)}</th>`);
+      html += '</tr></thead><tbody>';
+
+      summary.byMak.forEach(group => {
+        if (!group.count) return;
+        html += `<tr><td>${escapeHtml(group.code)}</td><td><strong>${escapeHtml(group.name)}</strong></td><td>${detailButton(group.records, `${group.name} — ${titlePrefix}`, 'Semua Status')}</td>`;
+        statuses.forEach(status => html += `<td>${detailButton(group.records.filter(row => row.status === status), `${group.name} — ${titlePrefix}`, status)}</td>`);
+        html += '</tr>';
+        group.sub.forEach(sub => {
+          if (!sub.count) return;
+          html += `<tr class="subrow"><td></td><td>&rarr; ${escapeHtml(sub.name)}</td><td>${detailButton(sub.records, `${sub.name} — ${titlePrefix}`, 'Semua Status')}</td>`;
+          statuses.forEach(status => html += `<td>${detailButton(sub.records.filter(row => row.status === status), `${sub.name} — ${titlePrefix}`, status)}</td>`);
+          html += '</tr>';
+        });
+      });
+
+      summary.customByMak.forEach(group => {
+        if (!group.count) return;
+        html += `<tr><td>${escapeHtml(group.code)}</td><td><strong>${escapeHtml(group.name)} (MAK Custom)</strong></td><td>${detailButton(group.records, `${group.name} — ${titlePrefix}`, 'Semua Status')}</td>`;
+        statuses.forEach(status => html += `<td>${detailButton(group.records.filter(row => row.status === status), `${group.name} — ${titlePrefix}`, status)}</td>`);
+        html += '</tr>';
+      });
+
+      html += `<tr><td></td><td><strong>GRAND TOTAL ${escapeHtml(titlePrefix.toUpperCase())}</strong></td><td><strong>${detailButton(summary.grand.records, `Grand Total ${titlePrefix}`, 'Semua Status')}</strong></td>`;
+      statuses.forEach(status => html += `<td><strong>${detailButton(summary.grand.records.filter(row => row.status === status), `Grand Total ${titlePrefix}`, status)}</strong></td>`);
+      html += '</tr></tbody></table></div>';
+      return html;
+    }
+
+    function detailButton(records, title, status) {
+      const count = records.length;
+      if (!count) return '<button class="count-btn" type="button" disabled>0</button>';
+      const index = appState.detailSets.push({ title, status, records }) - 1;
+      return `<button class="count-btn" type="button" data-detail-index="${index}">${count}</button>`;
+    }
+
+    function renderUnclassifiedDetails(processed) {
+      const groups = groupByJenis(processed.unclassified);
+      els.unclassifiedDetails.classList.toggle('hidden', !groups.length);
+      if (!groups.length) {
+        els.unclassifiedTable.innerHTML = '';
+        return;
+      }
+
+      const makOptions = classificationOptions();
+      let html = '<thead><tr><th>Jenis Permohonan</th><th>Jumlah</th><th>Kelompok MAK</th><th>Sub Layanan</th><th>MAK Custom</th><th>Aksi</th></tr></thead><tbody>';
+      groups.forEach((group, index) => {
+        html += `
+          <tr>
+            <td>${escapeHtml(group.jenis)}</td>
+            <td>${detailButton(group.records, `Tidak Terklasifikasi — ${group.jenis}`, 'Semua Status')}</td>
+            <td>
+              <select data-role="existing" data-index="${index}">
+                <option value="">Pilih kode MAK</option>
+                ${makOptions.map(option => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`).join('')}
+              </select>
+            </td>
+            <td>
+              <select data-role="subservice" data-index="${index}" disabled>
+                <option value="">Pilih sub layanan</option>
+              </select>
+            </td>
+            <td>
+              <div class="inline-form" style="grid-template-columns:minmax(150px,1fr) minmax(180px,1.3fr);">
+                <input type="text" data-role="custom-code" data-index="${index}" placeholder="Kode MAK">
+                <input type="text" data-role="custom-name" data-index="${index}" placeholder="Nama kelompok">
+              </div>
+            </td>
+            <td>
+              <button class="primary" type="button" data-role="existing-btn" data-action="map-existing" data-index="${index}" data-jenis="${escapeHtml(group.jenis)}" disabled>Masukkan ke MAK Tetap</button>
+              <button class="secondary" type="button" data-role="custom-btn" data-action="map-custom" data-index="${index}" data-jenis="${escapeHtml(group.jenis)}" disabled>Simpan MAK Custom</button>
+            </td>
+          </tr>
+        `;
+      });
+      html += '</tbody>';
+      els.unclassifiedTable.innerHTML = html;
+    }
+
+    function renderCustomSummary(processed) {
+      const groups = Array.from(processed.summary.customByMak.values()).filter(group => group.count);
+      els.customPanel.classList.toggle('hidden', !groups.length);
+      if (!groups.length) {
+        els.customTable.innerHTML = '';
+        return;
+      }
+
+      const statuses = processed.summary.statuses;
+      let html = '<caption style="caption-side: top; text-align: left; padding: 0 0 10px;"><button class="secondary" type="button" data-action="release-all-custom">Keluarkan Semua MAK Custom</button></caption>';
+      html += '<thead><tr><th>Kode MAK</th><th>Uraian</th><th>Jumlah</th>';
+      statuses.forEach(status => html += `<th>${escapeHtml(status)}</th>`);
+      html += '<th>Aksi</th></tr></thead><tbody>';
+      groups.forEach(group => {
+        html += `<tr><td>${escapeHtml(group.code)}</td><td>${escapeHtml(group.name)}</td><td>${detailButton(group.records, group.name, 'Semua Status')}</td>`;
+        statuses.forEach(status => html += `<td>${detailButton(group.records.filter(row => row.status === status), group.name, status)}</td>`);
+        html += `<td><button class="primary" type="button" data-action="release-custom" data-code="${escapeHtml(group.code)}">Keluarkan</button></td>`;
+        html += '</tr>';
+      });
+      html += '</tbody>';
+      els.customTable.innerHTML = html;
+    }
+
+    function handleCustomRelease(event) {
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+
+      if (button.dataset.action === 'release-all-custom') {
+        const count = removeCustomMappings();
+        if (!count) return;
+        const ok = confirm(`Keluarkan semua ${count} mapping MAK custom dan kembalikan ke Tidak Terklasifikasi?`);
+        if (!ok) return;
+        removeCustomMappings(true);
+        showMessage('Semua MAK custom dikeluarkan dan dikembalikan ke Tidak Terklasifikasi.', 'success');
+        return;
+      }
+
+      if (button.dataset.action === 'release-custom') {
+        const code = button.dataset.code;
+        const count = removeCustomMappings(code);
+        if (!count) return;
+        const ok = confirm(`Keluarkan ${count} mapping dari MAK custom ${code} dan kembalikan ke Tidak Terklasifikasi?`);
+        if (!ok) return;
+        removeCustomMappings(code, true);
+        showMessage(`MAK custom ${code} dikeluarkan dan dikembalikan ke Tidak Terklasifikasi.`, 'success');
+      }
+    }
+
+    function removeCustomMappings(target = true, apply = false) {
+      const keys = Object.keys(appState.manualMappings).filter(key => {
+        const mapping = appState.manualMappings[key];
+        return mapping && mapping.custom && (target === true || mapping.code === target);
+      });
+      if (!apply) return keys.length;
+      keys.forEach(key => delete appState.manualMappings[key]);
+      saveManualMappings();
+      rebuildRecordsWithManualMappings();
+      refreshProcessedView();
+      return keys.length;
+    }
+
+    function handleDetailClick(event) {
+      const button = event.target.closest('button[data-detail-index]');
+      if (!button) return;
+      const detail = appState.detailSets[Number(button.dataset.detailIndex)];
+      if (!detail) return;
+      showDetailModal(detail);
+    }
+
+    function isPemecahanDetail(detail) {
+      if (!detail) return false;
+      const records = detail.records || [];
+      return records.length > 0 && records.every(row => row.code === '7971.BAH.004') && records.some(isPemecahanRow);
+    }
+
+    function isPemecahanRow(row) {
+      return row?.code === '7971.BAH.004' &&
+        (/pemecahan\s*bidang/i.test(cleanText(row.subservice)) || /pemecahan\s*bidang/i.test(cleanText(row.jenis)));
+    }
+
+    function detailSubservice(row) {
+      return row.subservice || row.jenis || row.serviceName || 'Layanan lainnya';
+    }
+
+    function serviceSortRank(row) {
+      const name = cleanText(detailSubservice(row)).toLowerCase();
+      if (/pemecahan\s*bidang/.test(name)) return 1;
+      if (/penggabungan\s*bidang/.test(name)) return 2;
+      if (/pemisahan\s*bidang/.test(name)) return 3;
+      return 9;
+    }
+
+    function numericBerkas(row) {
+      const parsed = parseBerkasForBidang(row);
+      if (parsed) return Number(parsed.nomor) || Number.MAX_SAFE_INTEGER;
+      const match = String(row.nomorBerkas || '').match(/\d+/);
+      return match ? Number(match[0]) : Number.MAX_SAFE_INTEGER;
+    }
+
+    function sortDetailRecords(records) {
+      return [...records].sort((a, b) => serviceSortRank(a) - serviceSortRank(b)
+        || String(a.monthKey || '').localeCompare(String(b.monthKey || ''))
+        || numericBerkas(a) - numericBerkas(b)
+        || String(a.nomorBerkas || '').localeCompare(String(b.nomorBerkas || ''), 'id'));
+    }
+
+    function detailIsMixed(detail) {
+      return new Set((detail.records || []).map(row => cleanText(detailSubservice(row)).toLowerCase())).size > 1;
+    }
+
+    function rowVolume(row) {
+      return isPemecahanRow(row) ? (row.jumlahBidang == null ? '' : Number(row.jumlahBidang)) : 1;
+    }
+
+    function rowUnit(row) {
+      return isPemecahanRow(row) ? 'Bidang' : 'Berkas';
+    }
+
+    function combinedVolumeText(records) {
+      const split = records.filter(isPemecahanRow);
+      const regular = records.length - split.length;
+      if (!regular) return `${sumBidang(split)} bidang`;
+      if (!split.length) return `${regular} berkas`;
+      return `${regular} berkas + ${sumBidang(split)} bidang`;
+    }
+
+    function detailDownloadScope(detail) {
+      const subservices = [...new Set((detail.records || []).map(detailSubservice).filter(Boolean))];
+      if (subservices.length === 1) return subservices[0];
+      const services = [...new Set((detail.records || []).map(row => row.serviceName).filter(Boolean))];
+      if (services.length === 1) return services[0];
+      return cleanText(detail.title).split(/\s+[—-]\s+/)[0] || 'Layanan Pertanahan';
+    }
+
+    function detailDownloadFileName(prefix, detail, scopeOverride = '') {
+      const scope = scopeOverride || detailDownloadScope(detail);
+      const period = getPeriod(detail.records || []).filePeriod;
+      return `${prefix}_${safeFilePart(scope)}_${safeFilePart(period)}_${safeFilePart(detail.status || 'Semua Status')}.xlsx`;
+    }
+
+    function showDetailModal(detail) {
+      appState.currentDetail = detail;
+      els.detailTitle.textContent = detailDownloadScope(detail);
+      const isPemecahan = isPemecahanDetail(detail);
+      const isMixed = detailIsMixed(detail);
+      els.extensionStatus.classList.toggle('hidden', !isPemecahan);
+      els.extensionHelpBtn.classList.toggle('hidden', !isPemecahan);
+      els.overflowMenuBtn.classList.toggle('hidden', !isPemecahan);
+      els.checkBidangBtn.classList.toggle('hidden', !isPemecahan);
+      const pemecahanCount = detail.records.filter(isPemecahanRow).length;
+      els.checkBidangBtn.textContent = isMixed ? `Cek Bidang Pemecahan (${pemecahanCount})` : 'Cek Jumlah Bidang';
+      els.downloadFailedBtn.classList.toggle('hidden', !isPemecahan);
+      els.downloadFailedBtn.disabled = !isPemecahan || !detail.records.some(row => row.statusBidang === 'Gagal' || row.statusBidang === 'Tidak ditemukan');
+      els.retryFailedBtn.classList.toggle('hidden', !isPemecahan || !detail.records.some(row => row.statusBidang === 'Gagal' || row.statusBidang === 'Tidak ditemukan'));
+      renderExtensionStatus();
+      let html = isPemecahan ? buildBidangSummaryHtml(detail.records) : `<p class="small">Jumlah data: ${detail.records.length} berkas</p>`;
+      if (isPemecahan && appState.activeBidangRequest?.started) html += buildBidangProgressHtml(appState.activeBidangRequest);
+      const serviceOptions = [...new Set(detail.records.map(detailSubservice))].sort().map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('');
+      html += `<div class="detail-tools"><input id="detailSearch" type="search" placeholder="Cari nama atau nomor berkas..." aria-label="Cari data">${isMixed ? `<select id="detailServiceFilter" aria-label="Filter sublayanan"><option value="">Semua sublayanan</option>${serviceOptions}</select>` : ''}<select id="detailStatusFilter" aria-label="Filter status"><option value="">Semua status</option>${isPemecahan ? '<option>Berhasil</option><option>Gagal</option><option>Tidak ditemukan</option><option>Belum diperiksa</option><option>Tidak perlu cek</option>' : ''}</select></div>`;
+      html += `<div class="table-wrap"><table class="detail-table ${isMixed ? 'wide' : ''}"><thead><tr><th>No.</th><th>Nama Pemohon</th><th>Nomor Berkas</th><th>Bulan</th>${isMixed ? '<th>Jenis Sublayanan</th>' : (!isPemecahan ? '<th>Jenis Layanan</th>' : '')}${isPemecahan ? '<th>Volume</th><th>Satuan</th><th>Status Cek</th>' : '<th>Status</th>'}</tr></thead><tbody id="detailTableBody"></tbody></table></div>`;
+      els.detailBody.innerHTML = html;
+      const renderRows = () => renderDetailRows(detail, isPemecahan);
+      document.getElementById('detailSearch').addEventListener('input', renderRows);
+      document.getElementById('detailStatusFilter').addEventListener('change', renderRows);
+      document.getElementById('detailServiceFilter')?.addEventListener('change', renderRows);
+      renderRows();
+      els.detailModal.classList.remove('hidden');
+    }
+
+    function buildBidangSummaryHtml(records) {
+      const pemecahan = records.filter(isPemecahanRow);
+      const other = records.filter(row => !isPemecahanRow(row));
+      const success = pemecahan.filter(row => row.statusBidang === 'Berhasil').length;
+      const failed = pemecahan.filter(row => row.statusBidang === 'Gagal' || row.statusBidang === 'Tidak ditemukan').length;
+      const monthGroups = groupBidangByMonth(records);
+      const monthCards = monthGroups.map(group => {
+        const split = group.records.filter(isPemecahanRow);
+        const regular = group.records.length - split.length;
+        return `<div class="month-recap-item"><strong>${escapeHtml(group.label)}</strong><span>${group.records.length} nomor berkas</span><span>Volume: ${regular} berkas + ${sumBidang(split)} bidang</span></div>`;
+      }).join('');
+      const open = monthGroups.length <= 3 ? ' open' : '';
+      return `<div class="detail-summary"><div class="summary-card"><span>Total nomor berkas</span><strong>${records.length}</strong></div><div class="summary-card total"><span>Grand total gabungan</span><strong>${combinedVolumeText(records)}</strong></div><div class="summary-card"><span>Pemecahan diperiksa</span><strong>${success}/${pemecahan.length}</strong></div><div class="summary-card"><span>Bermasalah</span><strong>${failed}</strong></div></div><details class="period-breakdown"${open}><summary>Rincian volume per bulan (${monthGroups.length} bulan)</summary><div class="month-recap-grid">${monthCards}</div></details>`;
+    }
+
+    function buildBidangProgressHtml(progress) {
+      const pct = progress.total ? Math.round((progress.completed || 0) / progress.total * 100) : 0;
+      return `<div class="progress-shell"><div class="progress-head"><span>${escapeHtml(progress.message)}</span><span>${pct}%</span></div><div class="progress-track"><span style="width:${pct}%"></span></div><div class="progress-meta"><span>${progress.success || 0} berhasil · ${progress.failed || 0} bermasalah</span><span>${progress.completed || 0} dari ${progress.total || 0}</span></div></div>`;
+    }
+
+    function renderDetailRows(detail, isPemecahan) {
+      const body = document.getElementById('detailTableBody');
+      if (!body) return;
+      const query = cleanText(document.getElementById('detailSearch')?.value).toLowerCase();
+      const status = document.getElementById('detailStatusFilter')?.value || '';
+      const service = document.getElementById('detailServiceFilter')?.value || '';
+      const isMixed = detailIsMixed(detail);
+      const filtered = sortDetailRecords(detail.records).filter(row => {
+        const rowCheckStatus = isPemecahanRow(row) ? row.statusBidang : 'Tidak perlu cek';
+        const matchesQuery = !query || `${row.applicant} ${row.nomorBerkas} ${detailSubservice(row)}`.toLowerCase().includes(query);
+        const matchesStatus = !status || (isPemecahan ? rowCheckStatus : row.status) === status;
+        return matchesQuery && matchesStatus && (!service || detailSubservice(row) === service);
+      });
+      body.innerHTML = filtered.map((row, index) => {
+        if (!isPemecahan) return `<tr><td>${index + 1}</td><td>${escapeHtml(row.applicant)}</td><td>${escapeHtml(row.nomorBerkas)}</td><td>${escapeHtml(formatMonthKey(row.monthKey))}</td><td>${escapeHtml(isMixed ? detailSubservice(row) : row.jenis)}</td><td>${escapeHtml(row.status)}</td></tr>`;
+        const split = isPemecahanRow(row);
+        const volume = rowVolume(row) === '' ? '—' : rowVolume(row);
+        const checkStatus = split ? row.statusBidang : 'Tidak perlu cek';
+        const statusClass = checkStatus === 'Berhasil' ? 'success' : (checkStatus === 'Gagal' || checkStatus === 'Tidak ditemukan' ? 'error' : '');
+        return `<tr><td>${index + 1}</td><td>${escapeHtml(row.applicant)}</td><td>${escapeHtml(row.nomorBerkas)}</td><td>${escapeHtml(formatMonthKey(row.monthKey))}</td>${isMixed ? `<td>${escapeHtml(detailSubservice(row))}</td>` : ''}<td class="${split && row.statusBidang === 'Berhasil' ? 'bidang-ok' : 'bidang-pending'}">${volume}</td><td>${rowUnit(row)}</td><td><span class="status-pill ${statusClass}" title="${escapeHtml(row.errorBidang || '')}">${escapeHtml(checkStatus)}</span></td></tr>`;
+      }).join('') || `<tr><td colspan="${isPemecahan ? (isMixed ? 8 : 7) : 6}" class="small">Tidak ada data yang sesuai filter.</td></tr>`;
+    }
+
+    function sumBidang(records) {
+      return records.reduce((sum, row) => sum + (Number(row.jumlahBidang) || 0), 0);
+    }
+
+    function groupBidangByMonth(records) {
+      const map = new Map();
+      records.forEach(row => {
+        const key = row.monthKey || 'tanpa-bulan';
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(row);
+      });
+      return [...map.entries()].sort((a,b) => a[0].localeCompare(b[0])).map(([key, grouped]) => ({ key, label: formatMonthKey(key), records: grouped }));
+    }
+
+    function formatMonthKey(key) {
+      const match = String(key).match(/^(\d{4})-(\d{2})$/);
+      return match ? `${titleCase(MONTHS[Number(match[2]) - 1])} ${match[1]}` : 'Tanpa bulan';
+    }
+
+    function closeDetailModal() {
+      els.detailModal.classList.add('hidden');
+      closeDownloadMenu();
+      closeOverflowMenu();
+      els.detailBody.innerHTML = '';
+      appState.currentDetail = null;
+    }
+
+    function downloadVisibleDetail() {
+      closeDownloadMenu();
+      const detail = appState.currentDetail;
+      if (!detail || !detail.records.length) return;
+      const isPemecahan = isPemecahanDetail(detail);
+      const sorted = sortDetailRecords(detail.records);
+      const aoa = [
+        isPemecahan
+          ? ['No.', 'Nama Pemohon', 'Jenis Sublayanan', 'Bulan', 'Nomor Berkas', 'Jumlah Bidang', 'Volume Pencairan', 'Satuan', 'Status Pengecekan', 'Status Berkas']
+          : ['No.', 'Nama Pemohon', 'Jenis Layanan', 'Bulan', 'Nomor Berkas', 'Status'],
+        ...sorted.map((row, index) => isPemecahan
+          ? [index + 1, row.applicant, detailSubservice(row), formatMonthKey(row.monthKey), row.nomorBerkas, isPemecahanRow(row) ? (row.jumlahBidang ?? '') : '', rowVolume(row), rowUnit(row), isPemecahanRow(row) ? row.statusBidang : 'Tidak perlu cek', row.status]
+          : [index + 1, row.applicant, row.jenis, formatMonthKey(row.monthKey), row.nomorBerkas, row.status])
+      ];
+      if (isPemecahan) return downloadPemecahanWorkbook(sorted, aoa, 'EVIDEN VOLUME', detailDownloadFileName('Eviden_Volume', detail), [8, 32, 25, 18, 18, 16, 18, 12, 20, 16]);
+      downloadAoaWorkbook(aoa, 'DETAIL DATA', detailDownloadFileName('Eviden_Data', detail), [8, 34, 64, 18, 18, 16]);
+    }
+
+    function downloadFullDetail() {
+      closeDownloadMenu();
+      const detail = appState.currentDetail;
+      if (!detail || !detail.records.length) return;
+      const headers = detail.records[0].rawHeaders && detail.records[0].rawHeaders.length
+        ? detail.records[0].rawHeaders
+        : ['Nama Pemohon', 'Jenis Permohonan', 'Nomor Berkas', 'Status'];
+      const outputHeaders = isPemecahanDetail(detail)
+        ? [...headers, 'Bulan', 'Jenis Sublayanan', 'Jumlah Bidang', 'Volume Pencairan', 'Satuan', 'Status Pengecekan Bidang']
+        : [...headers, 'Bulan'];
+      const aoa = [
+        outputHeaders,
+        ...sortDetailRecords(detail.records).map(row => {
+          if (row.rawRow && row.rawRow.length) {
+            const base = headers.map((_, index) => row.rawRow[index] ?? '');
+            return isPemecahanDetail(detail) ? [...base, formatMonthKey(row.monthKey), detailSubservice(row), isPemecahanRow(row) ? (row.jumlahBidang ?? '') : '', rowVolume(row), rowUnit(row), isPemecahanRow(row) ? row.statusBidang : 'Tidak perlu cek'] : [...base, formatMonthKey(row.monthKey)];
+          }
+          const base = [row.applicant, row.jenis, row.nomorBerkas, row.status];
+          return isPemecahanDetail(detail) ? [...base, formatMonthKey(row.monthKey), detailSubservice(row), isPemecahanRow(row) ? (row.jumlahBidang ?? '') : '', rowVolume(row), rowUnit(row), isPemecahanRow(row) ? row.statusBidang : 'Tidak perlu cek'] : [...base, formatMonthKey(row.monthKey)];
+        })
+      ];
+      if (isPemecahanDetail(detail)) return downloadPemecahanWorkbook(detail.records, aoa, 'DETAIL LENGKAP', detailDownloadFileName('Eviden_Lengkap', detail), outputHeaders.map(() => 18));
+      downloadAoaWorkbook(aoa, 'DETAIL LENGKAP', detailDownloadFileName('Eviden_Lengkap', detail), outputHeaders.map(() => 18));
+    }
+
+    function downloadFailedDetail() {
+      closeDownloadMenu();
+      const detail = appState.currentDetail;
+      if (!detail || !isPemecahanDetail(detail)) return;
+      const failed = detail.records.filter(row => row.statusBidang === 'Gagal' || row.statusBidang === 'Tidak ditemukan');
+      if (!failed.length) return alert('Tidak ada data gagal atau tidak ditemukan.');
+      const aoa = [
+        ['No.', 'Nama Pemohon', 'Bulan', 'Nomor Berkas', 'Jumlah Bidang', 'Status Pengecekan'],
+        ...failed.map((row, index) => [index + 1, row.applicant, formatMonthKey(row.monthKey), row.nomorBerkas, row.jumlahBidang ?? '', row.statusBidang])
+      ];
+      downloadPemecahanWorkbook(failed, aoa, 'DATA GAGAL', detailDownloadFileName('Data_Gagal', detail, 'Pemecahan Bidang'), [8, 34, 18, 20, 16, 22]);
+    }
+
+    function downloadPemecahanWorkbook(records, dataAoa, sheetName, fileName, widths) {
+      const wb = XLSX.utils.book_new();
+      const monthGroups = groupBidangByMonth(records);
+      const pemecahan = records.filter(isPemecahanRow);
+      const regular = records.filter(row => !isPemecahanRow(row));
+      const years = [...new Set(records.map(row => String(row.monthKey || '').slice(0, 4)).filter(year => /^\d{4}$/.test(year)))].sort();
+      const yearLabel = years.length === 1 ? years[0] : (years.length ? `${years[0]}-${years[years.length - 1]}` : 'XXXX');
+      const summaryRows = monthGroups.map((group, index) => {
+        const pemisahan = group.records.filter(row => /pemisahan\s*bidang/i.test(cleanText(detailSubservice(row))));
+        const penggabungan = group.records.filter(row => /penggabungan\s*bidang/i.test(cleanText(detailSubservice(row))));
+        const split = group.records.filter(isPemecahanRow);
+        const berkasNonPemecahan = pemisahan.length + penggabungan.length;
+        return [index + 1, group.label, pemisahan.length, 'BERKAS', penggabungan.length, 'BERKAS', split.length, 'BERKAS', sumBidang(split), 'BIDANG', `${berkasNonPemecahan} berkas + ${sumBidang(split)} bidang`];
+      });
+      const totalPemisahan = records.filter(row => /pemisahan\s*bidang/i.test(cleanText(detailSubservice(row)))).length;
+      const totalPenggabungan = records.filter(row => /penggabungan\s*bidang/i.test(cleanText(detailSubservice(row)))).length;
+      const summaryAoa = [
+        [`RINGKASAN VOLUME LAYANAN PEMECAHAN SHAT TAHUN ${yearLabel}`],
+        [],
+        [],
+        ['NO', 'Bulan', 'PEMISAHAN BIDANG', '', 'PENGGABUNGAN BIDANG', '', 'PEMECAHAN BIDANG', '', '', '', 'VOLUME PENCAIRAN'],
+        ...summaryRows,
+        ['GRAND TOTAL', '', totalPemisahan, 'BERKAS', totalPenggabungan, 'BERKAS', pemecahan.length, 'BERKAS', sumBidang(pemecahan), 'BIDANG', combinedVolumeText(records)]
+      ];
+      const summaryWs = XLSX.utils.aoa_to_sheet(summaryAoa);
+      mergeRow(summaryWs, 0, 11);
+      mergeCells(summaryWs, 3, 2, 3, 3);
+      mergeCells(summaryWs, 3, 4, 3, 5);
+      mergeCells(summaryWs, 3, 6, 3, 9);
+      mergeCells(summaryWs, summaryAoa.length - 1, 0, summaryAoa.length - 1, 1);
+      applyTableStyle(summaryWs, summaryAoa.length, 11);
+      for (let c = 0; c < 11; c++) {
+        const address = XLSX.utils.encode_cell({ r: 3, c });
+        if (summaryWs[address]) summaryWs[address].s = headerStyle();
+      }
+      summaryWs['!freeze'] = { xSplit: 0, ySplit: 4 };
+      summaryWs['!rows'] = [{ hpt: 24 }, {}, {}, { hpt: 28 }];
+      summaryWs['!cols'] = makeCols([7, 23, 11, 11, 13, 11, 11, 11, 11, 11, 25]);
+      XLSX.utils.book_append_sheet(wb, summaryWs, 'RINGKASAN');
+      const dataWs = XLSX.utils.aoa_to_sheet(dataAoa);
+      applyTableStyle(dataWs, dataAoa.length, dataAoa[0].length);
+      dataWs['!cols'] = makeCols(widths);
+      if (sheetName === 'EVIDEN VOLUME') {
+        const statusIndex = dataAoa[0].indexOf('Status Pengecekan');
+        if (statusIndex >= 0) dataWs['!cols'][statusIndex] = { ...(dataWs['!cols'][statusIndex] || {}), hidden: true };
+      }
+      appendSignatureBlock(dataWs, dataAoa.length, dataAoa[0].length);
+      XLSX.utils.book_append_sheet(wb, dataWs, cleanSheetName(sheetName));
+      XLSX.writeFile(wb, fileName, { compression: true });
+    }
+
+    function downloadAoaWorkbook(aoa, sheetName, fileName, widths) {
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      applyTableStyle(ws, aoa.length, aoa[0].length);
+      ws['!cols'] = makeCols(widths);
+      appendSignatureBlock(ws, aoa.length, aoa[0].length);
+      XLSX.utils.book_append_sheet(wb, ws, cleanSheetName(sheetName));
+      XLSX.writeFile(wb, fileName, { compression: true });
+    }
+
+    function appendSignatureBlock(ws, currentRowCount, colCount) {
+      const signatureStart = Math.max(1, colCount - 3);
+      const signatureRow = text => {
+        const row = Array(colCount).fill('');
+        row[signatureStart] = text;
+        return row;
+      };
+      const rows = [
+        [],
+        signatureRow('Mengetahui,'),
+        signatureRow(els.kasiPosition.value.trim() || '..............................'),
+        [],
+        [],
+        [],
+        signatureRow(els.kasiName.value.trim() || '..............................'),
+        signatureRow(`NIP. ${els.kasiNip.value.trim() || '..............................'}`)
+      ];
+      XLSX.utils.sheet_add_aoa(ws, rows, { origin: -1 });
+      [1, 2, 6, 7].forEach(offset => {
+        mergeCells(ws, currentRowCount + offset, signatureStart, currentRowCount + offset, colCount - 1);
+        const cell = ws[XLSX.utils.encode_cell({ r: currentRowCount + offset, c: signatureStart })];
+        if (cell) {
+          cell.s = baseCellStyle();
+          cell.s.alignment = { horizontal: 'center', vertical: 'center', wrapText: true };
+          cell.s.border = {};
+        }
+      });
+      ws['!rows'] = ws['!rows'] || [];
+      [3, 4, 5].forEach(offset => { ws['!rows'][currentRowCount + offset] = { hpt: 22 }; });
+    }
+
+    function pingExtension() {
+      window.postMessage({ source: EXTENSION_APP_SOURCE, type: 'PING_EXTENSION' }, '*');
+    }
+
+    function renderExtensionStatus() {
+      els.extensionStatus.textContent = appState.extensionReady ? 'Ekstensi terpasang' : 'Ekstensi belum terpasang';
+      els.extensionStatus.classList.toggle('ready', appState.extensionReady);
+      els.checkBidangBtn.disabled = !appState.extensionReady || Boolean(appState.activeBidangRequest);
+      els.checkBidangBtn.title = appState.extensionReady ? 'Periksa otomatis melalui tab ATR/BPN yang sudah login.' : 'Pasang ekstensi dan aktifkan izin akses URL file.';
+      const needsGuide = Boolean(appState.currentDetail && isPemecahanDetail(appState.currentDetail) && !appState.extensionReady);
+      els.extensionGuideBanner.classList.toggle('hidden', !needsGuide);
+      const browser = detectBrowser();
+      els.extensionBrowserMessage.textContent = browser.supported
+        ? `Browser terdeteksi: ${browser.name}. Unduh paket ekstensi, ekstrak ZIP, lalu pilih folder extension saat pemasangan.`
+        : 'Browser ini belum didukung untuk otomasi. Buka aplikasi menggunakan Google Chrome atau Microsoft Edge.';
+      els.openExtensionsBtn.disabled = !browser.supported;
+    }
+
+    function detectBrowser() {
+      const ua = navigator.userAgent || '';
+      if (/Edg\//i.test(ua)) return { name: 'Microsoft Edge', supported: true, url: 'edge://extensions' };
+      if (/Chrome\//i.test(ua) && !/OPR\//i.test(ua)) return { name: 'Google Chrome', supported: true, url: 'chrome://extensions' };
+      return { name: 'Browser lain', supported: false, url: '' };
+    }
+
+    function openExtensionGuide() {
+      els.extensionGuideModal.classList.remove('hidden');
+    }
+
+    function closeExtensionGuide() {
+      els.extensionGuideModal.classList.add('hidden');
+    }
+
+    async function openBrowserExtensionsPage() {
+      const browser = detectBrowser();
+      if (!browser.supported) return alert('Gunakan Google Chrome atau Microsoft Edge untuk memasang ekstensi otomatisasi.');
+      try { await navigator.clipboard.writeText(browser.url); } catch {}
+      const opened = window.open(browser.url, '_blank');
+      if (!opened) alert(`Browser melindungi halaman internal agar tidak dibuka langsung. Alamat ${browser.url} sudah dicoba disalin. Tempelkan alamat tersebut ke address bar, lalu tekan Enter.`);
+    }
+
+    function closeDownloadMenu() {
+      els.downloadMenu.classList.add('hidden');
+      els.downloadMenuBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    function closeOverflowMenu() {
+      els.overflowMenu.classList.add('hidden');
+      els.overflowMenuBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    function startBidangCheck(recordsOverride = null) {
+      const detail = appState.currentDetail;
+      if (!detail || !isPemecahanDetail(detail)) return;
+      if (!appState.extensionReady) {
+        alert('Ekstensi belum terpasang atau izin akses URL file belum aktif. Ikuti PETUNJUK_PEMASANGAN.txt lalu muat ulang aplikasi.');
+        return;
+      }
+      let sourceRecords = recordsOverride || detail.records.filter(row => isPemecahanRow(row) && !['Berhasil', 'Tidak ditemukan'].includes(row.statusBidang));
+      if (!sourceRecords.length) {
+        if (!confirm('Semua nomor sudah pernah diperiksa. Periksa ulang seluruh nomor?')) return;
+        sourceRecords = detail.records.filter(isPemecahanRow);
+      }
+      const records = sourceRecords.map(row => {
+        const parsed = parseBerkasForBidang(row);
+        return parsed ? { key: bidangKey(row), nomor: parsed.nomor, tahun: parsed.tahun, applicant: row.applicant } : null;
+      }).filter(Boolean);
+      if (!records.length) return alert('Nomor dan tahun berkas pada eviden ini belum dapat dikenali.');
+      const requestId = `bidang-${Date.now()}`;
+      appState.activeBidangRequest = { requestId, started: false, message: `Membuka tab Informasi Berkas ATR/BPN...`, total: records.length, completed: 0, success: 0, failed: 0 };
+      renderExtensionStatus();
+      showDetailModal(detail);
+      showToast('Membuka ATR/BPN', 'Ekstensi sedang membuka tab Informasi Berkas.', '');
+      window.postMessage({ source: EXTENSION_APP_SOURCE, type: 'CHECK_BIDANG', requestId, records }, '*');
+    }
+
+    function retryFailedBidang() {
+      closeOverflowMenu();
+      const detail = appState.currentDetail;
+      if (!detail) return;
+      const failed = detail.records.filter(row => row.statusBidang === 'Gagal' || row.statusBidang === 'Tidak ditemukan');
+      if (!failed.length) return showToast('Tidak ada data bermasalah', 'Semua nomor yang diperiksa memiliki hasil.', 'success');
+      startBidangCheck(failed);
+    }
+
+    function handleExtensionMessage(event) {
+      if (event.source !== window || event.data?.source !== EXTENSION_SOURCE) return;
+      const data = event.data;
+      if (data.type === 'EXTENSION_READY') {
+        appState.extensionReady = true;
+        renderExtensionStatus();
+        return;
+      }
+      if (!appState.activeBidangRequest || data.requestId !== appState.activeBidangRequest.requestId) return;
+      if (data.type === 'BIDANG_STARTED') {
+        appState.activeBidangRequest.started = true;
+        appState.activeBidangRequest.message = `Tab ATR/BPN dibuka. Menyiapkan ${data.total} nomor berkas...`;
+      } else if (data.type === 'BIDANG_PROGRESS') {
+        appState.activeBidangRequest.started = true;
+        appState.activeBidangRequest.message = `Memeriksa ${data.index + 1} dari ${data.total}: ${data.record.nomor}/${data.record.tahun}`;
+      } else if (data.type === 'BIDANG_RESULT') {
+        saveBidangResult(data.result);
+        appState.activeBidangRequest.message = `Tersimpan ${data.index + 1} dari ${data.total}: ${data.result.nomor}/${data.result.tahun} = ${data.result.jumlahBidang ?? 'tidak ditemukan'} bidang`;
+        appState.activeBidangRequest.completed = data.index + 1;
+        if (data.result.statusBidang === 'Berhasil') appState.activeBidangRequest.success += 1;
+        else appState.activeBidangRequest.failed += 1;
+      } else if (data.type === 'BIDANG_COMPLETE') {
+        const detail = appState.currentDetail;
+        appState.activeBidangRequest = null;
+        refreshProcessedView();
+        const grandTotal = detail ? sumBidang(detail.records) : 0;
+        showMessage(`Pengecekan selesai: ${data.total} nomor berkas, grand total ${grandTotal} bidang.`, 'success');
+        showToast('Pengecekan selesai', `${data.total} nomor berkas diperiksa · grand total ${grandTotal} bidang.`, 'success');
+      } else if (data.type === 'BIDANG_ERROR') {
+        const error = data.error || 'Pengecekan jumlah bidang gagal.';
+        appState.activeBidangRequest = null;
+        showMessage(error, 'error');
+        showToast('Pengecekan terhenti', error, 'error');
+      }
+      if (appState.currentDetail) showDetailModal(appState.currentDetail);
+    }
+
+    function showToast(title, message, type = '') {
+      const stack = document.getElementById('toastStack');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<strong>${escapeHtml(title)}</strong><span>${escapeHtml(message)}</span>`;
+      stack.appendChild(toast);
+      setTimeout(() => toast.remove(), 6500);
+    }
+
+    function saveBidangResult(result) {
+      const saved = {
+        jumlahBidang: Number.isInteger(result.jumlahBidang) ? result.jumlahBidang : null,
+        statusBidang: result.statusBidang || 'Gagal',
+        errorBidang: result.error || '',
+        checkedAt: new Date().toLocaleString('id-ID')
+      };
+      appState.bidangResults[result.key] = saved;
+      localStorage.setItem(BIDANG_STORAGE_KEY, JSON.stringify(appState.bidangResults));
+      appState.allRecords.forEach(row => {
+        if (bidangKey(row) === result.key) Object.assign(row, saved, { checkedBidangAt: saved.checkedAt });
+      });
+    }
+
+    function loadBidangResults() {
+      try { return JSON.parse(localStorage.getItem(BIDANG_STORAGE_KEY) || '{}') || {}; }
+      catch { return {}; }
+    }
+
+    function bidangKey(row) {
+      return bidangKeyFromValues(row.nomorBerkas, row.berkasYear);
+    }
+
+    function bidangKeyFromValues(nomorBerkas, fallbackYear) {
+      const text = cleanText(nomorBerkas);
+      const match = text.match(/(\d+)\s*\/\s*(\d{4})/);
+      const nomor = match ? match[1] : (text.match(/\d+/) || [''])[0];
+      const tahun = match ? match[2] : String(fallbackYear || '');
+      return nomor && tahun ? `${nomor}/${tahun}` : text;
+    }
+
+    function parseBerkasForBidang(row) {
+      const key = bidangKey(row);
+      const match = key.match(/^(\d+)\/(\d{4})$/);
+      return match ? { nomor: match[1], tahun: match[2] } : null;
+    }
+
+    function safeFilePart(value) {
+      return cleanText(value).replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, '_').slice(0, 60) || 'Data';
+    }
+
+    function groupByJenis(records) {
+      const map = new Map();
+      records.forEach(row => {
+        const key = row.jenis || '(Kosong)';
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(row);
+      });
+      return Array.from(map.entries())
+        .map(([jenis, groupedRecords]) => ({
+          jenis,
+          count: groupedRecords.length,
+          records: groupedRecords
+        }))
+        .sort((a, b) => b.count - a.count || a.jenis.localeCompare(b.jenis));
+    }
+
+    function classificationOptions() {
+      return MAK_DEFINITIONS.map(def => ({
+        label: `${def.code} - ${def.name}`,
+        value: def.code
+      }));
+    }
+
+    function populateSubserviceOptions(index, code) {
+      const select = els.unclassifiedTable.querySelector(`select[data-role="subservice"][data-index="${index}"]`);
+      if (!select) return;
+      const def = MAK_DEFINITIONS.find(item => item.code === code);
+      const subservices = def ? def.subservices : [];
+      select.innerHTML = '<option value="">Pilih sub layanan</option>' + subservices
+        .map(sub => `<option value="${escapeHtml(sub)}">${escapeHtml(sub)}</option>`).join('');
+      select.disabled = !subservices.length;
+      if (!subservices.length) select.value = '';
+    }
+
+    function handleManualClassification(event) {
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+
+      const index = button.dataset.index;
+      const jenis = button.dataset.jenis;
+      const key = normalizeManualKey(jenis);
+      const select = els.unclassifiedTable.querySelector(`select[data-role="existing"][data-index="${index}"]`);
+      const subSelect = els.unclassifiedTable.querySelector(`select[data-role="subservice"][data-index="${index}"]`);
+      const codeInput = els.unclassifiedTable.querySelector(`input[data-role="custom-code"][data-index="${index}"]`);
+      const nameInput = els.unclassifiedTable.querySelector(`input[data-role="custom-name"][data-index="${index}"]`);
+      const selectedMak = select ? select.value : '';
+      const selectedSubservice = subSelect ? subSelect.value : '';
+      const customCode = cleanText(codeInput ? codeInput.value : '');
+      const customName = cleanText(nameInput ? nameInput.value : '');
+
+      if (selectedMak && customCode) {
+        showMessage('Pilih salah satu: MAK tetap atau MAK custom. Kosongkan salah satunya terlebih dahulu.', 'error');
+        return;
+      }
+
+      if (button.dataset.action === 'map-existing') {
+        if (customCode) {
+          showMessage('Kolom MAK custom sudah terisi. Gunakan tombol Simpan MAK Custom.', 'error');
+          return;
+        }
+        if (!selectedMak) {
+          showMessage('Pilih kode MAK terlebih dahulu.', 'error');
+          return;
+        }
+        const def = MAK_DEFINITIONS.find(item => item.code === selectedMak);
+        if (def && def.subservices.length && !selectedSubservice) {
+          showMessage('Pilih sub layanan dari kelompok MAK tersebut.', 'error');
+          return;
+        }
+        appState.manualMappings[key] = service(selectedMak, selectedSubservice);
+      }
+
+      if (button.dataset.action === 'map-custom') {
+        if (selectedMak) {
+          showMessage('Dropdown MAK tetap sudah dipilih. Gunakan tombol Masukkan ke MAK Tetap atau kosongkan dropdown.', 'error');
+          return;
+        }
+        if (!customCode) {
+          showMessage('Isi Kode MAK custom terlebih dahulu.', 'error');
+          return;
+        }
+        const ok = confirm(`Simpan "${jenis}" sebagai MAK custom ${customCode}?`);
+        if (!ok) return;
+        appState.manualMappings[key] = customService(customCode, customName || jenis);
+      }
+
+      saveManualMappings();
+      rebuildRecordsWithManualMappings();
+      refreshProcessedView();
+      showMessage(`Jenis permohonan "${jenis}" berhasil diklasifikasikan.`, 'success');
+    }
+
+    function handleUnclassifiedFormChange(event) {
+      const field = event.target.closest('[data-index]');
+      if (!field) return;
+      const index = field.dataset.index;
+      const select = els.unclassifiedTable.querySelector(`select[data-role="existing"][data-index="${index}"]`);
+      const subSelect = els.unclassifiedTable.querySelector(`select[data-role="subservice"][data-index="${index}"]`);
+      const codeInput = els.unclassifiedTable.querySelector(`input[data-role="custom-code"][data-index="${index}"]`);
+      const nameInput = els.unclassifiedTable.querySelector(`input[data-role="custom-name"][data-index="${index}"]`);
+      const existingBtn = els.unclassifiedTable.querySelector(`button[data-role="existing-btn"][data-index="${index}"]`);
+      const customBtn = els.unclassifiedTable.querySelector(`button[data-role="custom-btn"][data-index="${index}"]`);
+
+      if (field.dataset.role === 'existing') populateSubserviceOptions(index, select ? select.value : '');
+
+      const selectedCode = select ? select.value : '';
+      const def = MAK_DEFINITIONS.find(item => item.code === selectedCode);
+      const needsSubservice = Boolean(def && def.subservices.length);
+      const hasValidExisting = Boolean(selectedCode && (!needsSubservice || (subSelect && subSelect.value)));
+      const hasCustom = Boolean(cleanText(codeInput ? codeInput.value : '') || cleanText(nameInput ? nameInput.value : ''));
+
+      if (existingBtn) existingBtn.disabled = !hasValidExisting || hasCustom;
+      if (customBtn) customBtn.disabled = !hasCustom || Boolean(selectedCode);
+      if (select) select.disabled = hasCustom;
+      if (subSelect) subSelect.disabled = hasCustom || !needsSubservice;
+      if (codeInput) codeInput.disabled = Boolean(selectedCode);
+      if (nameInput) nameInput.disabled = Boolean(selectedCode);
+    }
+
+    function buildOutputWorkbook(processed) {
+      const wb = XLSX.utils.book_new();
+      addRekapSheetsByYear(wb, processed);
+      MAK_DEFINITIONS.forEach(def => addCoverSheet(wb, processed, def));
+      MAK_DEFINITIONS.forEach(def => addNominativeSheets(wb, processed, def));
+      addCustomSheets(wb, processed);
+      if (processed.unclassified.length) addUnclassifiedSheet(wb, processed);
+      return wb;
+    }
+
+    function buildCustomWorkbook(processed) {
+      const wb = XLSX.utils.book_new();
+      if (processed.customRecords.length) {
+        addCustomRekapSheet(wb, processed);
+        addCustomSheets(wb, processed);
+      }
+      return wb;
+    }
+
+    function addRekapSheetsByYear(wb, processed) {
+      addRekapSheetForYear(wb, processed.currentYearRecords, 'TAHUN BERJALAN', processed.summary.statuses, 'REKAP TAHUN BERJALAN');
+
+      const previousGroups = groupRecordsByYear(processed.previousYearRecords);
+      if (previousGroups.size) {
+        addPreviousYearsRekapSheet(wb, previousGroups, processed.summary.statuses);
+      }
+    }
+
+    function addPreviousYearsRekapSheet(wb, yearGroups, statuses) {
+      const aoa = [];
+      yearGroups.forEach((records, year) => {
+        const summary = summarize(records);
+        if (aoa.length) aoa.push([]);
+        aoa.push([`KELOMPOK BERKAS TAHUN ${year}`]);
+        aoa.push(['Kode MAK', 'Kelompok Kegiatan / Sub Layanan', 'Jumlah', ...statuses]);
+        summary.byMak.forEach(group => {
+          if (!group.count) return;
+          aoa.push([group.code, group.name, group.count, ...statuses.map(status => group.statuses[status] || 0)]);
+          group.sub.forEach(sub => {
+            if (!sub.count) return;
+            const note = sub.name === 'Pemecahan Bidang' ? ' (jumlah bidang dari hasil pengecekan ATR/BPN)' : '';
+            aoa.push(['', `-> ${sub.name}${note}`, sub.count, ...statuses.map(status => sub.statuses[status] || 0)]);
+          });
+        });
+        summary.customByMak.forEach(group => {
+          if (!group.count) return;
+          aoa.push([group.code, `${group.name} (MAK Custom)`, group.count, ...statuses.map(status => group.statuses[status] || 0)]);
+        });
+        aoa.push(['', `GRAND TOTAL BERKAS TAHUN ${year}`, summary.grand.count, ...statuses.map(status => summary.grand.statuses[status] || 0)]);
+      });
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws['!cols'] = makeCols([18, 70, 12, ...statuses.map(() => 13)]);
+      XLSX.utils.book_append_sheet(wb, ws, 'REKAP TAHUN SEBELUMNYA');
+    }
+
+    function addRekapSheetForYear(wb, records, year, statuses, sheetName = '') {
+      const summary = summarize(records);
+      const aoa = [['Kode MAK', 'Kelompok Kegiatan / Sub Layanan', 'Jumlah', ...statuses]];
+      summary.byMak.forEach(group => {
+        if (!group.count) return;
+        aoa.push([group.code, group.name, group.count, ...statuses.map(status => group.statuses[status] || 0)]);
+        group.sub.forEach(sub => {
+          if (!sub.count) return;
+          const note = sub.name === 'Pemecahan Bidang' ? ' (jumlah bidang dari hasil pengecekan ATR/BPN)' : '';
+          aoa.push(['', `-> ${sub.name}${note}`, sub.count, ...statuses.map(status => sub.statuses[status] || 0)]);
+        });
+      });
+      summary.customByMak.forEach(group => {
+        if (!group.count) return;
+        aoa.push([group.code, `${group.name} (MAK Custom)`, group.count, ...statuses.map(status => group.statuses[status] || 0)]);
+      });
+      aoa.push(['', `GRAND TOTAL TAHUN ${year}`, summary.grand.count, ...statuses.map(status => summary.grand.statuses[status] || 0)]);
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      applyTableStyle(ws, aoa.length, aoa[0].length);
+      ws['!cols'] = makeCols([18, 70, 12, ...statuses.map(() => 13)]);
+      XLSX.utils.book_append_sheet(wb, ws, cleanSheetName(sheetName || `REKAP ${year}`));
+    }
+
+    function addCustomRekapSheet(wb, processed) {
+      const statuses = processed.summary.statuses;
+      const aoa = [['Kode MAK', 'Uraian', 'Jumlah', ...statuses]];
+      processed.summary.customByMak.forEach(group => {
+        if (!group.count) return;
+        aoa.push([group.code, group.name, group.count, ...statuses.map(status => group.statuses[status] || 0)]);
+      });
+      const total = processed.customRecords.length;
+      aoa.push(['', 'TOTAL MAK CUSTOM', total, ...statuses.map(status => processed.customRecords.filter(row => row.status === status).length)]);
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      applyTableStyle(ws, aoa.length, aoa[0].length);
+      ws['!cols'] = makeCols([18, 70, 12, ...statuses.map(() => 13)]);
+      XLSX.utils.book_append_sheet(wb, ws, 'REKAP MAK CUSTOM');
+    }
+
+    function addCoverSheet(wb, processed, def) {
+      const currentSummary = processed.currentYearSummary;
+      const group = currentSummary.byMak.get(def.code);
+      const subRows = def.subservices.length
+        ? def.subservices.flatMap(sub => {
+          const item = group.sub.get(sub);
+          const currentRecords = item ? item.records : [];
+          const amount = def.code === '7971.BAH.004' && sub === 'Pemecahan Bidang'
+            ? `${currentRecords.reduce((sum, row) => sum + (Number(row.jumlahBidang) || 0), 0) || '........'} bidang`
+            : `${currentRecords.length} berkas`;
+          return [[sub, amount]];
+        })
+        : [[def.name, `${group.count} berkas`]];
+
+      const bidangTotal = def.code === '7971.BAH.004'
+        ? Array.from(group.sub.values()).flatMap(item => item.records).reduce((sum, row) => sum + (Number(row.jumlahBidang) || 0), 0)
+        : 0;
+      const nonPemecahanTotal = def.code === '7971.BAH.004'
+        ? Array.from(group.sub.values()).flatMap(item => item.records).filter(row => !isPemecahanRow(row)).length
+        : 0;
+      const totalText = def.code === '7971.BAH.004'
+        ? `${nonPemecahanTotal} berkas + ${bidangTotal || '........'} bidang`
+        : `${group.count} berkas`;
+      const aoa = [
+        [def.code],
+        [def.name],
+        [`Periode ${processed.period.shortLabel}`],
+        [],
+        ['Uraian', 'Jumlah'],
+        ...subRows,
+        ['TOTAL', totalText]
+      ];
+      if (def.code === '7971.BAH.004') {
+        aoa.push([]);
+        aoa.push(['Catatan', 'Jumlah Pemecahan Bidang diperoleh dari pengecekan otomatis Informasi Berkas ATR/BPN.']);
+      }
+
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      mergeRow(ws, 0, 2);
+      mergeRow(ws, 1, 2);
+      mergeRow(ws, 2, 2);
+      applyCoverStyle(ws, aoa.length);
+      ws['!cols'] = makeCols([58, 28]);
+      XLSX.utils.book_append_sheet(wb, ws, def.cover);
+    }
+
+    function addNominativeSheets(wb, processed, def) {
+      const group = processed.currentYearSummary.byMak.get(def.code);
+      if (!group || !group.count) return;
+      const targets = def.subservices.length
+        ? def.subservices.map(sub => ({ name: sub, records: (group.sub.get(sub) || { records: [] }).records }))
+        : [{ name: def.name, records: Array.from(group.sub.values()).flatMap(item => item.records) }];
+
+      targets.forEach(target => {
+        if (!target.records.length) return;
+        addNominativeSheet(wb, processed, target.name, target.records, def.short, target.name === 'Pemecahan Bidang');
+      });
+    }
+
+    function addCustomSheets(wb, processed) {
+      processed.summary.customByMak.forEach(group => {
+        if (!group.count) return;
+        addNominativeSheet(wb, processed, group.name, group.records, group.code, false);
+      });
+    }
+
+    function addNominativeSheet(wb, processed, title, records, short, hasBidang) {
+      records = sortDetailRecords(records);
+      const hasVolumeUnit = short === '004';
+      const header = hasVolumeUnit
+        ? ['No.', 'NAMA PEMOHON', 'JENIS PERMOHONAN', 'BULAN', 'NOMOR BERKAS', 'VOLUME PENCAIRAN', 'SATUAN']
+        : ['No.', 'NAMA PEMOHON', 'JENIS PERMOHONAN', 'BULAN', 'NOMOR BERKAS'];
+      const width = header.length;
+      const signatureStart = hasBidang ? Math.max(0, width - 3) : Math.max(0, width - 2);
+      const signatureRow = text => {
+        const row = Array(width).fill('');
+        row[signatureStart] = text;
+        return row;
+      };
+      const aoa = [
+        ['DAFTAR NOMINATIF'],
+        [title.toUpperCase()],
+        [processed.period.label],
+        [],
+        header,
+        ...records.map((row, index) => {
+          const base = [index + 1, row.applicant, row.jenis, formatMonthKey(row.monthKey), row.nomorBerkas];
+          return hasVolumeUnit ? [...base, rowVolume(row), rowUnit(row)] : base;
+        }),
+        [],
+        signatureRow('Mengetahui,'),
+        signatureRow(els.kasiPosition.value.trim() || '..............................'),
+        [],
+        [],
+        [],
+        signatureRow(els.kasiName.value.trim() || '..............................'),
+        signatureRow(`NIP. ${els.kasiNip.value.trim() || '..............................'}`)
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      mergeRow(ws, 0, width);
+      mergeRow(ws, 1, width);
+      mergeRow(ws, 2, width);
+      [records.length + 6, records.length + 7, records.length + 11, records.length + 12]
+        .forEach(rowIndex => mergeCells(ws, rowIndex, signatureStart, rowIndex, width - 1));
+      applyNominativeStyle(ws, aoa.length, width, records.length);
+      ws['!rows'] = [];
+      [records.length + 8, records.length + 9, records.length + 10].forEach(rowIndex => {
+        ws['!rows'][rowIndex] = { hpt: 22 };
+      });
+      ws['!cols'] = makeCols(hasVolumeUnit ? [8, 32, 58, 18, 18, 20, 13] : [8, 32, 58, 18, 18]);
+      XLSX.utils.book_append_sheet(wb, ws, uniqueSheetName(wb, `${short} ${title}`));
+    }
+
+    function addUnclassifiedSheet(wb, processed) {
+      const aoa = [
+        ['TIDAK TERKLASIFIKASI'],
+        ['Jenis permohonan pada sheet ini belum cocok dengan mapping MAK.'],
+        [],
+        ['No.', 'NAMA PEMOHON', 'JENIS PERMOHONAN', 'BULAN', 'NOMOR BERKAS', 'STATUS BERKAS'],
+        ...processed.unclassified.map((row, index) => [index + 1, row.applicant, row.jenis, formatMonthKey(row.monthKey), row.nomorBerkas, row.rawStatus])
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      mergeRow(ws, 0, 6);
+      mergeRow(ws, 1, 6);
+      applyNominativeStyle(ws, aoa.length, 6, processed.unclassified.length, 3);
+      ws['!cols'] = makeCols([8, 32, 58, 18, 18, 24]);
+      XLSX.utils.book_append_sheet(wb, ws, 'TIDAK TERKLASIFIKASI');
+    }
+
+    function mergeRow(ws, rowIndex, colCount) {
+      ws['!merges'] = ws['!merges'] || [];
+      ws['!merges'].push({ s: { r: rowIndex, c: 0 }, e: { r: rowIndex, c: colCount - 1 } });
+    }
+
+    function mergeCells(ws, startRow, startCol, endRow, endCol) {
+      ws['!merges'] = ws['!merges'] || [];
+      ws['!merges'].push({ s: { r: startRow, c: startCol }, e: { r: endRow, c: endCol } });
+    }
+
+    function makeCols(widths) {
+      return widths.map(wch => ({ wch }));
+    }
+
+    function applyTableStyle(ws, rowCount, colCount) {
+      for (let r = 0; r < rowCount; r++) {
+        for (let c = 0; c < colCount; c++) {
+          const cell = ws[XLSX.utils.encode_cell({ r, c })];
+          if (!cell) continue;
+          cell.s = baseCellStyle();
+          if (r === 0) cell.s = headerStyle();
+          if (r === rowCount - 1) cell.s = totalStyle();
+          if (c >= 2) cell.s.alignment.horizontal = 'center';
+        }
+      }
+      ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+    }
+
+    function applyCoverStyle(ws, rowCount) {
+      for (let r = 0; r < rowCount; r++) {
+        for (let c = 0; c < 2; c++) {
+          const cell = ws[XLSX.utils.encode_cell({ r, c })];
+          if (!cell) continue;
+          cell.s = baseCellStyle();
+          if (r < 3) {
+            cell.s.font = { bold: true, sz: r === 0 ? 14 : 12 };
+            cell.s.alignment.horizontal = 'center';
+            cell.s.border = {};
+          }
+          if (r === 4) cell.s = headerStyle();
+          if (String(cell.v).toUpperCase() === 'TOTAL') cell.s = totalStyle();
+        }
+      }
+    }
+
+    function applyNominativeStyle(ws, rowCount, colCount, recordCount, headerRow = 4) {
+      for (let r = 0; r < rowCount; r++) {
+        for (let c = 0; c < colCount; c++) {
+          const cell = ws[XLSX.utils.encode_cell({ r, c })];
+          if (!cell) continue;
+          cell.s = baseCellStyle();
+          if (r < 3) {
+            cell.s.font = { bold: true, sz: r === 0 ? 14 : 12 };
+            cell.s.alignment.horizontal = 'center';
+            cell.s.border = {};
+          }
+          if (r === headerRow) cell.s = headerStyle();
+          if (r > headerRow && r <= headerRow + recordCount) {
+            if (c === 0 || c >= 3) cell.s.alignment.horizontal = 'center';
+          }
+          if (r > headerRow + recordCount + 1) {
+            cell.s.alignment.horizontal = 'center';
+            cell.s.alignment.vertical = 'center';
+            cell.s.border = {};
+          }
+        }
+      }
+    }
+
+    function baseCellStyle() {
+      return {
+        font: { name: 'Arial', sz: 10 },
+        alignment: { vertical: 'top', wrapText: true },
+        border: {
+          top: { style: 'thin', color: { rgb: 'B7C2D0' } },
+          bottom: { style: 'thin', color: { rgb: 'B7C2D0' } },
+          left: { style: 'thin', color: { rgb: 'B7C2D0' } },
+          right: { style: 'thin', color: { rgb: 'B7C2D0' } }
+        }
+      };
+    }
+
+    function headerStyle() {
+      const style = baseCellStyle();
+      style.font = { name: 'Arial', sz: 10, bold: true, color: { rgb: 'FFFFFF' } };
+      style.fill = { fgColor: { rgb: '12345A' } };
+      style.alignment = { vertical: 'center', horizontal: 'center', wrapText: true };
+      return style;
+    }
+
+    function totalStyle() {
+      const style = baseCellStyle();
+      style.font = { name: 'Arial', sz: 10, bold: true };
+      style.fill = { fgColor: { rgb: 'DDEBFA' } };
+      style.alignment = { vertical: 'center', wrapText: true };
+      return style;
+    }
+
+    function uniqueSheetName(wb, rawName) {
+      const cleaned = cleanSheetName(rawName);
+      let name = cleaned;
+      let index = 2;
+      while (wb.SheetNames.includes(name)) {
+        const suffix = ` ${index}`;
+        name = cleaned.slice(0, 31 - suffix.length) + suffix;
+        index++;
+      }
+      return name;
+    }
+
+    function cleanSheetName(value) {
+      return cleanText(value).replace(/[\[\]\*\/\\\?\:]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 31) || 'Sheet';
+    }
+
+    function downloadWorkbook() {
+      if (!appState.outputWorkbook) return;
+      XLSX.writeFile(appState.outputWorkbook, appState.outputFileName, { compression: true });
+    }
+
+    function downloadCustomWorkbook() {
+      if (!appState.customWorkbook || !appState.processed || !appState.processed.customRecords.length) return;
+      XLSX.writeFile(appState.customWorkbook, appState.customFileName, { compression: true });
+    }
+
+    function showMessage(text, type) {
+      els.message.textContent = text;
+      els.message.className = `message ${type}`;
+    }
+
+    function clearMessage() {
+      els.message.textContent = '';
+      els.message.className = 'message';
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char]));
+    }
+  </script>
+</body>
+</html>

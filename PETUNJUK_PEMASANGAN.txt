@@ -1,0 +1,29 @@
+PENGECEK JUMLAH BIDANG ATR/BPN — PANDUAN SINGKAT
+
+BROWSER YANG DIDUKUNG
+- Google Chrome
+- Microsoft Edge
+
+Browser lain belum didukung untuk otomasi ini. Buka file HTML menggunakan Chrome atau Edge.
+
+CARA MEMASANG
+1. Pada dialog Pemecahan Bidang, klik "Unduh Ekstensi".
+2. Ekstrak file extension.zip. Jangan memilih file ZIP secara langsung.
+3. Klik "Buka Halaman Ekstensi" pada aplikasi.
+   Jika halaman internal tidak terbuka otomatis, tempel alamat yang telah disalin:
+   - Chrome: chrome://extensions
+   - Edge: edge://extensions
+4. Aktifkan Mode developer / Developer mode.
+5. Klik Muat yang belum dipaketkan / Load unpacked.
+6. Pilih FOLDER "extension" hasil ekstrak, bukan manifest.json, background.js, atau content.js.
+   Pada jendela pemilih folder, file di dalam folder memang dapat tidak terlihat. Tetap klik Select Folder.
+7. Buka Details ekstensi dan aktifkan Allow access to file URLs / Izinkan akses ke URL file.
+8. Muat ulang file index_revisi_MAK_v4_UX.html.
+
+JIKA SUDAH PERNAH MEMASANG VERSI LAMA
+1. Buka chrome://extensions (Chrome) atau edge://extensions (Edge).
+2. Pada ekstensi "Pengecek Jumlah Bidang ATR/BPN", klik Reload / Muat ulang.
+3. Kembali ke aplikasi lalu tekan Ctrl+F5. Versi ekstensi terbaru adalah 1.2.0.
+
+Jika berhasil, dialog Pemecahan Bidang menampilkan status "Ekstensi terpasang".
+Login dan Google Authenticator tetap dilakukan langsung oleh pengguna pada situs ATR/BPN.
