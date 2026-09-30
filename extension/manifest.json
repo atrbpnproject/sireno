@@ -1,14 +1,22 @@
 {
   "manifest_version": 3,
   "name": "Pengecek Jumlah Bidang ATR/BPN",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Menghubungkan Aplikasi Daftar Nominatif dengan halaman Informasi Berkas ATR/BPN.",
   "permissions": ["tabs", "notifications"],
-  "host_permissions": ["https://aplikasi.atrbpn.go.id/*"],
+  "host_permissions": [
+    "https://aplikasi.atrbpn.go.id/*",
+    "https://*.github.io/*"
+  ],
   "background": { "service_worker": "background.js" },
   "content_scripts": [
     {
-      "matches": ["file:///*", "http://localhost/*", "https://aplikasi.atrbpn.go.id/*"],
+      "matches": [
+        "file:///*",
+        "http://localhost/*",
+        "https://*.github.io/*",
+        "https://aplikasi.atrbpn.go.id/*"
+      ],
       "js": ["content.js"],
       "run_at": "document_idle"
     }

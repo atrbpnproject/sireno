@@ -224,13 +224,38 @@
     }
 
     .month-filter {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
       margin: 10px 0 18px;
     }
-
-    .month-filter label {
+    .month-filter-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .month-filter-status {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .month-filter-actions { display:flex; flex-wrap:wrap; gap:8px; }
+    .month-filter-actions button {
+      padding: 7px 10px;
+      border: 1px solid #b9cde0;
+      border-radius: 7px;
+      background: #eef6fd;
+      color: #174f7e;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .month-filter-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .month-filter-options label {
       display: inline-flex;
       align-items: center;
       gap: 7px;
@@ -241,6 +266,11 @@
       background: var(--soft);
       font-weight: 700;
       cursor: pointer;
+    }
+    .month-filter-options label:has(input:checked) {
+      border-color: #75a8d3;
+      background: #e8f3fc;
+      color: #174f7e;
     }
 
     details {
@@ -422,8 +452,6 @@
     button:not(:disabled):hover { transform:translateY(-1px); box-shadow:0 7px 16px rgba(15,35,58,.15); }
     button.primary { background:linear-gradient(135deg,#1f67ad,#174f87); }
     button.secondary { background:linear-gradient(135deg,#07805f,#046c50); }
-    .quick-nav { display:flex; flex-wrap:wrap; gap:8px; padding:5px 0 18px; }
-    .quick-nav button { padding:8px 11px; border:1px solid #ccd9e7; background:#fff; color:var(--navy); border-radius:999px; font-size:12px; }
     .stats { grid-template-columns:repeat(6,minmax(0,1fr)); }
     .stat { position:relative; overflow:hidden; min-height:104px; border-radius:12px; background:#fff; }
     .stat::before { content:''; position:absolute; inset:0 auto 0 0; width:4px; background:#8ba6c1; }
@@ -680,6 +708,13 @@
       background:#f8fbfe;
     }
     .recap-month-filter .month-filter { margin-top:8px; }
+    .column-mode-control { display:flex; justify-content:flex-end; margin:0 0 12px; }
+    .column-mode-switch { display:inline-flex; align-items:center; gap:9px; padding:8px 11px; border:1px solid #cbdbe9; border-radius:999px; background:#f8fbfe; color:#315b82; font-size:12px; font-weight:800; cursor:pointer; user-select:none; }
+    .column-mode-switch input { position:absolute; opacity:0; pointer-events:none; }
+    .column-mode-track { position:relative; width:36px; height:20px; border-radius:999px; background:#b7c7d6; transition:.18s ease; }
+    .column-mode-track::after { content:''; position:absolute; top:3px; left:3px; width:14px; height:14px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:.18s ease; }
+    .column-mode-switch input:checked + .column-mode-track { background:#1f67ad; }
+    .column-mode-switch input:checked + .column-mode-track::after { transform:translateX(16px); }
     .recap-note {
       margin-top:10px;
       padding:10px 12px;
@@ -692,6 +727,7 @@
       .si-reno-tabs { overflow-x:auto; }
       .si-reno-tab { flex:1 0 auto; }
       .recap-headline { align-items:flex-start; flex-direction:column; }
+      .month-filter-status { width:100%; margin-left:0; }
     }
 
 </style>
@@ -723,7 +759,7 @@
         <div class="panel-heading">
           <div>
             <h2>Mulai Rekapitulasi</h2>
-            <p>Unggah file Excel layanan sesuai DI yang tersedia. SI RENO akan membaca seluruh data dan menampilkan rekapitulasi layanan secara otomatis.</p>
+            <p>Unggah file Excel DI305, DI208, atau DI301A. SI RENO akan membaca seluruh data dan menampilkan rekapitulasi layanan secara otomatis.</p>
           </div>
           <span class="step-badge">LANGKAH 1</span>
         </div>
@@ -745,10 +781,8 @@
         <div class="actions">
           <button id="processBtn" class="primary hidden" type="button" aria-hidden="true" tabindex="-1">Proses &amp; Rekapitulasi</button>
         </div>
-        <span class="small">Setelah file dipilih atau dilepas, SI RENO langsung menganalisis data secara otomatis. Data diproses lokal di browser dan tidak dikirim ke server.</span>
       </div>
       <div id="message" class="message"></div>
-      <p class="small">SI RENO mengenali variasi nama kolom DI305, DI301A, dan DI208. Minimal tersedia kolom nama pemohon/pihak dan jenis permohonan/layanan/kegiatan.</p>
     </section>
 
     <section id="preview" class="panel hidden">
@@ -778,23 +812,30 @@
           <div id="recapMonthFilter" class="month-filter"></div>
           <p class="small">Pilih bulan yang ingin direkap. Default: seluruh bulan pada file.</p>
         </div>
+        <div class="column-mode-control">
+          <label class="column-mode-switch" title="Ganti kolom status menjadi kolom bulan">
+            <input id="recapMonthColumnsToggle" type="checkbox">
+            <span class="column-mode-track" aria-hidden="true"></span>
+            <span>Tampilkan kolom per bulan</span>
+          </label>
+        </div>
         <div id="recapStats" class="stats"></div>
         <div class="recap-table-wrap">
           <table id="recapTable" class="recap-table"></table>
         </div>
-        <div class="recap-note">
+        <div id="recapNote" class="recap-note">
           Tampilan ini bekerja seperti Pivot Table: setiap jenis layanan direkap menjadi satu baris dan jumlahnya dipecah berdasarkan status. Data Tahun Sebelumnya tidak dimasukkan ke Rekapitulasi.
         </div>
       </div>
 
       <div id="nominatifTabPanel" class="si-reno-tab-panel hidden">
-        <div class="quick-nav">
-          <button type="button" data-scroll-target="currentYearSection">Tahun Berjalan</button>
-          <button type="button" data-scroll-target="previousYearSection">Tahun Sebelumnya</button>
-          <button type="button" data-scroll-target="unclassifiedDetails">Tidak Terklasifikasi</button>
-          <button type="button" data-scroll-target="customPanel">MAK Custom</button>
+        <div class="column-mode-control">
+          <label class="column-mode-switch" title="Ganti kolom status menjadi kolom bulan">
+            <input id="nominatifMonthColumnsToggle" type="checkbox">
+            <span class="column-mode-track" aria-hidden="true"></span>
+            <span>Tampilkan kolom per bulan</span>
+          </label>
         </div>
-
         <div class="stats">
           <div class="stat"><span>Data Terbaca</span><strong id="readCount">0</strong></div>
           <div class="stat current"><span>Tahun Berjalan</span><strong id="currentCount">0</strong></div>
@@ -896,8 +937,9 @@
           <li>Aktifkan <strong>Developer mode / Mode developer</strong>.</li>
           <li>Klik <strong>Load unpacked / Muat yang belum dipaketkan</strong>.</li>
           <li>Pilih <strong>folder extension hasil ekstrak</strong>. Pada jendela pemilih folder, file di dalam folder memang tidak terlihat; cukup klik <strong>Select Folder</strong>.</li>
-          <li>Buka <strong>Details</strong> ekstensi dan aktifkan <strong>Allow access to file URLs / Izinkan akses ke URL file</strong>.</li>
-          <li>Muat ulang aplikasi. Status akan berubah menjadi <strong>Ekstensi terpasang</strong>.</li>
+          <li>Jika aplikasi dibuka dari file lokal, buka <strong>Details</strong> ekstensi dan aktifkan <strong>Allow access to file URLs / Izinkan akses ke URL file</strong>.</li>
+          <li>Jika ekstensi pernah dipasang sebelumnya, klik <strong>Reload / Muat ulang</strong> pada kartu ekstensi agar izin GitHub Pages versi terbaru diterapkan.</li>
+          <li>Muat ulang aplikasi dengan <strong>Ctrl+F5</strong>. Status akan berubah menjadi <strong>Ekstensi terpasang</strong>.</li>
         </ol>
       </div>
     </div>
@@ -1035,6 +1077,10 @@
       customFileName: '',
       selectedMonths: new Set(),
       selectedRecapMonths: new Set(),
+      recapMonthsInitialized: false,
+      recapColumnMode: 'status',
+      nominatifColumnMode: 'status',
+      activeTab: 'rekap',
       availableMonths: [],
       detailSets: [],
       currentDetail: null,
@@ -1056,6 +1102,9 @@
       recapPeriod: document.getElementById('recapPeriod'),
       recapMonthPanel: document.getElementById('recapMonthPanel'),
       recapMonthFilter: document.getElementById('recapMonthFilter'),
+      recapMonthColumnsToggle: document.getElementById('recapMonthColumnsToggle'),
+      nominatifMonthColumnsToggle: document.getElementById('nominatifMonthColumnsToggle'),
+      recapNote: document.getElementById('recapNote'),
       readCount: document.getElementById('readCount'),
       currentCount: document.getElementById('currentCount'),
       previousCount: document.getElementById('previousCount'),
@@ -1105,6 +1154,16 @@
     els.downloadCustomBtn.addEventListener('click', downloadCustomWorkbook);
     els.monthFilter.addEventListener('change', handleMonthChange);
     els.recapMonthFilter.addEventListener('change', handleRecapMonthChange);
+    els.monthFilter.addEventListener('click', event => handleMonthFilterAction(event, 'nominatif'));
+    els.recapMonthFilter.addEventListener('click', event => handleMonthFilterAction(event, 'rekap'));
+    els.recapMonthColumnsToggle.addEventListener('change', () => {
+      appState.recapColumnMode = els.recapMonthColumnsToggle.checked ? 'month' : 'status';
+      renderOverallRecap(getRecapFilteredRecords());
+    });
+    els.nominatifMonthColumnsToggle.addEventListener('change', () => {
+      appState.nominatifColumnMode = els.nominatifMonthColumnsToggle.checked ? 'month' : 'status';
+      refreshProcessedView();
+    });
     els.unclassifiedTable.addEventListener('click', handleDetailClick);
     els.unclassifiedTable.addEventListener('click', handleManualClassification);
     els.unclassifiedTable.addEventListener('input', handleUnclassifiedFormChange);
@@ -1177,13 +1236,6 @@
       els.file.files = transfer.files;
       els.file.dispatchEvent(new Event('change'));
     });
-    document.addEventListener('click', event => {
-      const button = event.target.closest('[data-scroll-target]');
-      if (!button) return;
-      const target = document.getElementById(button.dataset.scrollTarget);
-      if (target && !target.classList.contains('hidden')) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-
     function normalizeKey(value) {
       return String(value || '').toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
     }
@@ -1500,6 +1552,8 @@
         appState.allRecords = buildAllRecords(source.rows, source.columns, source.headers, source.headerRowIndex);
         appState.availableMonths = getAvailableMonths(appState.allRecords);
         appState.selectedMonths = new Set(appState.availableMonths);
+        appState.selectedRecapMonths = new Set(appState.availableMonths);
+        appState.recapMonthsInitialized = true;
         renderMonthFilter();
         refreshProcessedView();
         els.downloadBtn.disabled = false;
@@ -1777,12 +1831,7 @@
       }
 
       els.monthPanel.classList.remove('hidden');
-      els.monthFilter.innerHTML = appState.availableMonths.map(key => `
-        <label>
-          <input type="checkbox" value="${escapeHtml(key)}" ${appState.selectedMonths.has(key) ? 'checked' : ''}>
-          ${escapeHtml(monthLabelFromKey(key))}
-        </label>
-      `).join('');
+      els.monthFilter.innerHTML = monthFilterMarkup(appState.selectedMonths, 'nominatif');
     }
 
     function renderRecapMonthFilter() {
@@ -1792,29 +1841,72 @@
         return;
       }
       els.recapMonthPanel.classList.remove('hidden');
-      els.recapMonthFilter.innerHTML = appState.availableMonths.map(key => `
+      els.recapMonthFilter.innerHTML = monthFilterMarkup(appState.selectedRecapMonths, 'rekap');
+    }
+
+    function monthFilterMarkup(selectedMonths, type) {
+      const count = selectedMonths.size;
+      const summary = count === appState.availableMonths.length
+        ? `Semua bulan (${count})`
+        : count ? `${count} bulan dipilih` : 'Belum ada bulan dipilih';
+      const options = appState.availableMonths.map(key => `
         <label>
-          <input type="checkbox" value="${escapeHtml(key)}" ${appState.selectedRecapMonths.has(key) ? 'checked' : ''}>
+          <input type="checkbox" value="${escapeHtml(key)}" ${selectedMonths.has(key) ? 'checked' : ''}>
           ${escapeHtml(monthLabelFromKey(key))}
         </label>
       `).join('');
+      return `<div class="month-filter-toolbar">
+          <div class="month-filter-actions">
+            <button type="button" data-month-action="all">Pilih Semua</button>
+            <button type="button" data-month-action="clear">Bersihkan</button>
+            <button type="button" data-month-action="latest">Bulan Terakhir</button>
+          </div>
+          <span class="month-filter-status">${escapeHtml(summary)}</span>
+        </div>
+        <div class="month-filter-options" data-filter-type="${type}">${options}</div>`;
     }
 
-    function handleRecapMonthChange() {
+    function updateMonthFilterSummary(container, selectedCount) {
+      const summary = container.querySelector('.month-filter-status');
+      if (!summary) return;
+      summary.textContent = selectedCount === appState.availableMonths.length
+        ? `Semua bulan (${selectedCount})`
+        : selectedCount ? `${selectedCount} bulan dipilih` : 'Belum ada bulan dipilih';
+    }
+
+    function handleMonthFilterAction(event, type) {
+      const button = event.target.closest('button[data-month-action]');
+      if (!button) return;
+      event.preventDefault();
+      const container = type === 'rekap' ? els.recapMonthFilter : els.monthFilter;
+      const checkboxes = [...container.querySelectorAll('input[type="checkbox"]')];
+      if (button.dataset.monthAction === 'all') {
+        checkboxes.forEach(input => { input.checked = true; });
+      } else if (button.dataset.monthAction === 'clear') {
+        checkboxes.forEach(input => { input.checked = false; });
+      } else {
+        checkboxes.forEach((input, index) => { input.checked = index === checkboxes.length - 1; });
+      }
+      if (type === 'rekap') handleRecapMonthChange();
+      else handleMonthChange();
+    }
+
+    function completeMonthRange(container) {
+      const inputs = [...container.querySelectorAll('input[type="checkbox"]')];
+      const selectedIndexes = inputs.map((input, index) => input.checked ? index : -1).filter(index => index >= 0);
+      if (selectedIndexes.length < 2) return;
+      const first = Math.min(...selectedIndexes);
+      const last = Math.max(...selectedIndexes);
+      inputs.forEach((input, index) => { input.checked = index >= first && index <= last; });
+    }
+
+    function handleRecapMonthChange(event) {
+      if (event?.target?.matches('input[type="checkbox"]')) completeMonthRange(els.recapMonthFilter);
       const checked = Array.from(els.recapMonthFilter.querySelectorAll('input[type="checkbox"]:checked'))
         .map(input => input.value);
-      if (!checked.length) {
-        showMessage('Pilih minimal satu bulan untuk rekapitulasi.', 'error');
-        renderRecapMonthFilter();
-        return;
-      }
-      if (!areMonthsContiguous(checked)) {
-        showMessage('Periode rekapitulasi harus berurutan. Pilih rentang bulan tanpa loncatan.', 'error');
-        renderRecapMonthFilter();
-        return;
-      }
       clearMessage();
       appState.selectedRecapMonths = new Set(checked);
+      updateMonthFilterSummary(els.recapMonthFilter, checked.length);
       renderOverallRecap(getRecapFilteredRecords());
     }
 
@@ -1822,25 +1914,21 @@
       // Rekapitulasi hanya menggunakan Tahun Berjalan.
       // Tahun Sebelumnya tetap dipertahankan untuk tab Nominatif.
       const currentYearRecords = appState.allRecords.filter(row => !row.isDifferentBerkasYear);
-      if (!appState.selectedRecapMonths.size) return currentYearRecords;
+      if (!appState.selectedRecapMonths.size) return [];
       return currentYearRecords.filter(row => !row.monthKey || appState.selectedRecapMonths.has(row.monthKey));
     }
 
-    function handleMonthChange() {
+    function handleMonthChange(event) {
+      if (event?.target?.matches('input[type="checkbox"]')) completeMonthRange(els.monthFilter);
       const checked = Array.from(els.monthFilter.querySelectorAll('input[type="checkbox"]:checked')).map(input => input.value);
       if (!checked.length) {
-        showMessage('Pilih minimal satu bulan untuk pencairan.', 'error');
-        const first = els.monthFilter.querySelector('input[type="checkbox"]');
-        if (first) first.checked = true;
-        appState.selectedMonths = new Set(first ? [first.value] : []);
-      } else if (!areMonthsContiguous(checked)) {
-        showMessage('Periode pencairan harus berurutan. Pilih rentang bulan tanpa loncatan.', 'error');
-        renderMonthFilter();
-        return;
+        clearMessage();
+        appState.selectedMonths = new Set();
       } else {
         clearMessage();
         appState.selectedMonths = new Set(checked);
       }
+      updateMonthFilterSummary(els.monthFilter, appState.selectedMonths.size);
       refreshProcessedView();
     }
 
@@ -1863,7 +1951,9 @@
     }
 
     function switchSIRenoTab(tabName) {
-      const isRekap = tabName !== 'nominatif';
+      const activeTab = tabName === 'nominatif' ? 'nominatif' : 'rekap';
+      appState.activeTab = activeTab;
+      const isRekap = activeTab === 'rekap';
       document.querySelectorAll('[data-sireno-tab]').forEach(tab => {
         const active = (isRekap && tab.dataset.sirenoTab === 'rekap') ||
           (!isRekap && tab.dataset.sirenoTab === 'nominatif');
@@ -1902,13 +1992,19 @@
           ? `Seluruh Bulan · ${monthKeys.size} bulan`
           : selectedCount
             ? `${selectedCount} Bulan`
-            : 'Seluruh Data';
+            : 'Belum ada bulan dipilih';
       }
 
       if (els.recapStats) {
-        const top = groups[0] || null;
-        const smallest = groups.length
-          ? groups[groups.length - 1]
+        // Tabel tetap diurutkan alfabetis, tetapi kartu insight harus
+        // diperingkat berdasarkan jumlah berkas, bukan posisi nama layanan.
+        const serviceRank = [...groups].sort((a, b) =>
+          b.rows.length - a.rows.length ||
+          a.jenis.localeCompare(b.jenis, 'id', { sensitivity: 'base' })
+        );
+        const top = serviceRank[0] || null;
+        const smallest = serviceRank.length
+          ? serviceRank[serviceRank.length - 1]
           : null;
 
         const monthGroups = new Map();
@@ -1973,6 +2069,9 @@
 
       if (!source.length) {
         els.recapTable.innerHTML = '<tbody><tr><td>Belum ada data untuk direkap.</td></tr></tbody>';
+        if (els.recapNote) els.recapNote.textContent = appState.recapColumnMode === 'month'
+          ? 'Mode bulanan aktif. Pilih minimal satu bulan untuk menampilkan rekapitulasi.'
+          : 'Tampilan ini bekerja seperti Pivot Table: setiap jenis layanan direkap menjadi satu baris dan jumlahnya dipecah berdasarkan status.';
         return;
       }
 
@@ -1986,19 +2085,30 @@
        * appState.detailSets menyimpan record yang tepat untuk setiap tombol,
        * sehingga klik angka membuka list berkas pada modal Detail Data.
        */
+      const isMonthMode = appState.recapColumnMode === 'month';
+      const recapColumns = isMonthMode
+        ? appState.availableMonths.filter(key => appState.selectedRecapMonths.has(key))
+        : statuses;
+      const columnLabel = value => isMonthMode ? monthLabelFromKey(value) : value;
+      const recordsForColumn = (rows, value) => isMonthMode
+        ? rows.filter(row => row.monthKey === value)
+        : rows.filter(row => (cleanText(row.status) || 'Status Tidak Tersedia') === value);
+
+      if (els.recapNote) els.recapNote.textContent = isMonthMode
+        ? 'Mode bulanan aktif: setiap jenis layanan dipecah berdasarkan bulan pada periode yang dipilih. Klik angka untuk melihat detail berkas.'
+        : 'Tampilan ini bekerja seperti Pivot Table: setiap jenis layanan direkap menjadi satu baris dan jumlahnya dipecah berdasarkan status. Data Tahun Sebelumnya tidak dimasukkan ke Rekapitulasi.';
+
       let html = '<thead><tr><th>Jenis Permohonan / Layanan</th><th>Total</th>';
-      statuses.forEach(status => html += `<th>${escapeHtml(status)}</th>`);
+      recapColumns.forEach(column => html += `<th>${escapeHtml(columnLabel(column))}</th>`);
       html += '</tr></thead><tbody>';
 
       groups.forEach(group => {
         html += `<tr><td><strong>${escapeHtml(group.jenis)}</strong></td>`;
         html += `<td class="status-number">${detailButton(group.rows, `Rekapitulasi — ${group.jenis}`, 'Semua Status')}</td>`;
 
-        statuses.forEach(status => {
-          const statusRecords = group.rows.filter(row =>
-            (cleanText(row.status) || 'Status Tidak Tersedia') === status
-          );
-          html += `<td class="status-number">${detailButton(statusRecords, `Rekapitulasi — ${group.jenis}`, status)}</td>`;
+        recapColumns.forEach(column => {
+          const columnRecords = recordsForColumn(group.rows, column);
+          html += `<td class="status-number">${detailButton(columnRecords, `Rekapitulasi — ${group.jenis}`, columnLabel(column))}</td>`;
         });
 
         html += '</tr>';
@@ -2006,11 +2116,9 @@
 
       html += '<tr class="grand-total"><td>GRAND TOTAL</td>';
       html += `<td class="status-number">${detailButton(source, 'Rekapitulasi — GRAND TOTAL', 'Semua Status')}</td>`;
-      statuses.forEach(status => {
-        const statusRecords = source.filter(row =>
-          (cleanText(row.status) || 'Status Tidak Tersedia') === status
-        );
-        html += `<td class="status-number">${detailButton(statusRecords, 'Rekapitulasi — GRAND TOTAL', status)}</td>`;
+      recapColumns.forEach(column => {
+        const columnRecords = recordsForColumn(source, column);
+        html += `<td class="status-number">${detailButton(columnRecords, 'Rekapitulasi — GRAND TOTAL', columnLabel(column))}</td>`;
       });
       html += '</tr></tbody>';
 
@@ -2020,11 +2128,15 @@
     function renderPreview(processed, sheetCount) {
       els.preview.classList.remove('hidden');
       appState.detailSets = [];
-      // Rekapitulasi SI RENO selalu menampilkan keseluruhan bulan/data.
-      // Tab Nominatif tetap mengikuti filter bulan yang dipilih.
-      appState.selectedRecapMonths = new Set(appState.availableMonths);
+      // Pilihan bulan Rekapitulasi dan Nominatif disimpan secara terpisah.
+      if (!appState.recapMonthsInitialized) {
+        appState.selectedRecapMonths = new Set(appState.availableMonths);
+        appState.recapMonthsInitialized = true;
+      }
       renderRecapMonthFilter();
-      switchSIRenoTab('rekap');
+      // Render ulang (misalnya setelah filter bulan Nominatif berubah) tidak
+      // boleh memindahkan pengguna dari tab yang sedang aktif.
+      switchSIRenoTab(appState.activeTab);
       renderOverallRecap(getRecapFilteredRecords());
       els.readCount.textContent = processed.records.length;
       els.currentCount.textContent = processed.currentYearRecords.length;
@@ -2058,19 +2170,26 @@
 
     function renderSummaryTable(summary, titlePrefix) {
       const statuses = summary.statuses;
+      const isMonthMode = appState.nominatifColumnMode === 'month';
+      const monthColumns = appState.availableMonths.filter(key => appState.selectedMonths.has(key));
+      const columns = isMonthMode ? monthColumns : statuses;
+      const columnLabel = value => isMonthMode ? monthLabelFromKey(value) : value;
+      const recordsForColumn = (records, value) => isMonthMode
+        ? records.filter(row => row.monthKey === value)
+        : records.filter(row => row.status === value);
       let html = '<div class="table-wrap"><table><thead><tr><th>Kode MAK</th><th>Kelompok Kegiatan / Sub Layanan</th><th>Jumlah</th>';
-      statuses.forEach(status => html += `<th>${escapeHtml(status)}</th>`);
+      columns.forEach(column => html += `<th>${escapeHtml(columnLabel(column))}</th>`);
       html += '</tr></thead><tbody>';
 
       summary.byMak.forEach(group => {
         if (!group.count) return;
         html += `<tr><td>${escapeHtml(group.code)}</td><td><strong>${escapeHtml(group.name)}</strong></td><td>${detailButton(group.records, `${group.name} — ${titlePrefix}`, 'Semua Status')}</td>`;
-        statuses.forEach(status => html += `<td>${detailButton(group.records.filter(row => row.status === status), `${group.name} — ${titlePrefix}`, status)}</td>`);
+        columns.forEach(column => html += `<td>${detailButton(recordsForColumn(group.records, column), `${group.name} — ${titlePrefix}`, columnLabel(column))}</td>`);
         html += '</tr>';
         group.sub.forEach(sub => {
           if (!sub.count) return;
           html += `<tr class="subrow"><td></td><td>&rarr; ${escapeHtml(sub.name)}</td><td>${detailButton(sub.records, `${sub.name} — ${titlePrefix}`, 'Semua Status')}</td>`;
-          statuses.forEach(status => html += `<td>${detailButton(sub.records.filter(row => row.status === status), `${sub.name} — ${titlePrefix}`, status)}</td>`);
+          columns.forEach(column => html += `<td>${detailButton(recordsForColumn(sub.records, column), `${sub.name} — ${titlePrefix}`, columnLabel(column))}</td>`);
           html += '</tr>';
         });
       });
@@ -2078,12 +2197,12 @@
       summary.customByMak.forEach(group => {
         if (!group.count) return;
         html += `<tr><td>${escapeHtml(group.code)}</td><td><strong>${escapeHtml(group.name)} (MAK Custom)</strong></td><td>${detailButton(group.records, `${group.name} — ${titlePrefix}`, 'Semua Status')}</td>`;
-        statuses.forEach(status => html += `<td>${detailButton(group.records.filter(row => row.status === status), `${group.name} — ${titlePrefix}`, status)}</td>`);
+        columns.forEach(column => html += `<td>${detailButton(recordsForColumn(group.records, column), `${group.name} — ${titlePrefix}`, columnLabel(column))}</td>`);
         html += '</tr>';
       });
 
       html += `<tr><td></td><td><strong>GRAND TOTAL ${escapeHtml(titlePrefix.toUpperCase())}</strong></td><td><strong>${detailButton(summary.grand.records, `Grand Total ${titlePrefix}`, 'Semua Status')}</strong></td>`;
-      statuses.forEach(status => html += `<td><strong>${detailButton(summary.grand.records.filter(row => row.status === status), `Grand Total ${titlePrefix}`, status)}</strong></td>`);
+      columns.forEach(column => html += `<td><strong>${detailButton(recordsForColumn(summary.grand.records, column), `Grand Total ${titlePrefix}`, columnLabel(column))}</strong></td>`);
       html += '</tr></tbody></table></div>';
       return html;
     }
@@ -2606,7 +2725,7 @@
       els.extensionStatus.textContent = appState.extensionReady ? 'Ekstensi terpasang' : 'Ekstensi belum terpasang';
       els.extensionStatus.classList.toggle('ready', appState.extensionReady);
       els.checkBidangBtn.disabled = !appState.extensionReady || Boolean(appState.activeBidangRequest);
-      els.checkBidangBtn.title = appState.extensionReady ? 'Periksa otomatis melalui tab ATR/BPN yang sudah login.' : 'Pasang ekstensi dan aktifkan izin akses URL file.';
+      els.checkBidangBtn.title = appState.extensionReady ? 'Periksa otomatis melalui tab ATR/BPN yang sudah login.' : 'Pasang atau muat ulang ekstensi agar dapat mengakses halaman aplikasi ini.';
       const needsGuide = Boolean(appState.currentDetail && isPemecahanDetail(appState.currentDetail) && !appState.extensionReady);
       els.extensionGuideBanner.classList.toggle('hidden', !needsGuide);
       const browser = detectBrowser();
@@ -2653,7 +2772,7 @@
       const detail = appState.currentDetail;
       if (!detail || !isPemecahanDetail(detail)) return;
       if (!appState.extensionReady) {
-        alert('Ekstensi belum terpasang atau izin akses URL file belum aktif. Ikuti PETUNJUK_PEMASANGAN.txt lalu muat ulang aplikasi.');
+        alert('Ekstensi belum terhubung ke halaman ini. Pasang atau muat ulang ekstensi versi terbaru, lalu muat ulang aplikasi dengan Ctrl+F5.');
         return;
       }
       let sourceRecords = recordsOverride || detail.records.filter(row => isPemecahanRow(row) && !['Berhasil', 'Tidak ditemukan'].includes(row.statusBidang));
