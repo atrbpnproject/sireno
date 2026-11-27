@@ -791,6 +791,83 @@
       #printArea .print-table th { position:static !important; }
     }
 
+    /* Penataan ulang tampilan (v8.14): lebih ringkas dan fokus pada hasil */
+    #inputPanel.loaded { padding:12px 16px; }
+    #inputPanel.loaded .si-reno-welcome,
+    #inputPanel.loaded #uploadWrap { display:none; }
+    #inputPanel .message:empty { display:none; }
+    #inputPanel .actions-toolbar { display:none; }
+    .file-bar { display:flex; align-items:center; gap:12px; }
+    .file-bar.hidden { display:none; }
+    .file-bar-icon { width:38px; height:38px; flex:0 0 38px; display:grid; place-items:center; border-radius:10px; background:#e6f4ee; color:#07805f; }
+    .file-bar-icon svg { width:22px; height:22px; }
+    .file-bar-info { flex:1 1 auto; min-width:0; }
+    .file-bar-info strong { display:block; color:var(--navy); font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .file-bar-info span { display:block; margin-top:2px; color:var(--muted); font-size:12px; }
+    .file-bar.dragover { outline:2px dashed var(--blue); outline-offset:6px; border-radius:8px; }
+    .ghost-button, .outline-button { background:#fff !important; color:#174f87; border:1px solid #b9cde0; }
+    .ghost-button:hover, .outline-button:not(:disabled):hover { background:#eef6fd !important; }
+    .outline-button:disabled { color:#9aa8b8; border-color:#dbe3ec; background:#f6f8fa !important; }
+    .ghost-button { padding:8px 14px; font-size:13px; white-space:nowrap; }
+
+    .results-panel { padding-top:0; }
+    .results-panel .si-reno-tabs {
+      position:sticky; top:0; z-index:15;
+      margin:0 -20px 18px; padding:12px 20px;
+      border:0; border-bottom:1px solid #dbe6f1; border-radius:14px 14px 0 0;
+      background:rgba(255,255,255,.96); backdrop-filter:blur(6px);
+    }
+    .results-panel .si-reno-tab { background:#f3f7fb; }
+    .results-panel .si-reno-tab.active { background:#1f67ad; }
+
+    .view-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:0 0 14px; }
+    .view-toolbar .column-mode-switch { margin-left:auto; }
+    .filter-pop-wrap { position:relative; }
+    .filter-pop-wrap.hidden { display:none; }
+    .filter-pop > summary {
+      display:inline-flex; align-items:center; gap:8px; padding:8px 12px;
+      border:1px solid #cbdbe9; border-radius:999px; background:#f8fbfe;
+      color:#315b82; font-size:12px; font-weight:800; user-select:none;
+    }
+    .filter-pop > summary::-webkit-details-marker { display:none; }
+    .filter-pop > summary::before { content:'▾'; order:3; transition:transform .2s; transform:none; }
+    .filter-pop[open] > summary::before { transform:rotate(180deg); }
+    .filter-pop > summary:hover { background:#eef6fd; }
+    .filter-pop-label { color:#5d7690; font-weight:700; }
+    .filter-pop-value { color:#174f7e; }
+    .filter-pop { margin:0; border:0; background:none; overflow:visible; }
+    .filter-pop-body {
+      position:absolute; left:0; top:calc(100% + 8px); z-index:25;
+      width:min(640px, calc(100vw - 48px)); padding:14px;
+      border:1px solid #d5dee8; border-radius:12px; background:#fff;
+      box-shadow:0 16px 36px rgba(24,54,86,.2);
+    }
+    .filter-pop-body .month-filter { margin:0; }
+    .filter-pop-body .small { margin-top:10px; font-size:12px; }
+
+    .recap-headline { margin-bottom:10px; }
+    .stats { gap:10px; margin-bottom:14px; }
+    .stat { min-height:84px; padding:12px 14px; }
+    .stat strong { font-size:22px; }
+    .stat strong.stat-text { font-size:15px; line-height:1.3; }
+    .stat span { font-size:11px; margin-bottom:6px; }
+    .recap-note { font-size:12px; }
+
+    #nominatifTabPanel .output-panel { margin:0 0 14px; border-color:#bcd5ec; background:linear-gradient(135deg,#f3f8fd,#eef6ff); }
+    .attention-details { margin:0 0 14px; border-color:#f1c9c4; }
+    .attention-details > summary { background:#fff5f3; color:#9b2c22; }
+
+    @media (max-width:760px) {
+      .results-panel .si-reno-tabs { margin:0 -16px 14px; padding:10px 16px; }
+      .view-toolbar .column-mode-switch { margin-left:0; }
+      .output-panel .actions { width:100%; }
+      .output-panel .actions button { flex:1 1 auto; }
+      .file-bar { flex-wrap:wrap; }
+      .stats, #recapStats { grid-template-columns:1fr 1fr; }
+      .stat { min-height:0; }
+      .file-bar-info strong { white-space:normal; overflow-wrap:anywhere; }
+    }
+
 </style>
 </head>
 <body>
@@ -810,7 +887,7 @@
           <p class="brand-subtitle">Sistem Informasi Rekapitulasi dan Nominatif</p>
         </div>
       </div>
-      <button id="appVersionBtn" class="version-badge" type="button" aria-haspopup="dialog">Versi 8.13</button>
+      <button id="appVersionBtn" class="version-badge" type="button" aria-haspopup="dialog">Versi 8.14</button>
     </div>
   </header>
 
@@ -822,23 +899,32 @@
             <h2>Mulai Rekapitulasi</h2>
             <p>Unggah file Excel DI305, DI208, atau DI301A. SI RENO akan membaca seluruh data dan menampilkan rekapitulasi layanan secara otomatis.</p>
           </div>
-          <span class="step-badge">LANGKAH 1</span>
         </div>
       </div>
 
-      <div>
-        <label for="excelFile">File Excel Sumber</label>
+      <div id="uploadWrap">
         <div id="uploadZone" class="upload-zone large">
           <div class="upload-icon">⇧</div>
           <div class="upload-copy">
             <strong>Klik atau tarik &amp; lepaskan file Excel di sini</strong>
             <span id="fileNameText">Mendukung DI305, DI301A, atau DI208 · Format .xlsx atau .xls</span>
           </div>
-          <input id="excelFile" type="file" accept=".xlsx,.xls">
+          <input id="excelFile" type="file" accept=".xlsx,.xls" aria-label="File Excel sumber">
         </div>
       </div>
 
-      <div class="actions-toolbar">
+      <div id="fileBar" class="file-bar hidden">
+        <div class="file-bar-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h8l4 4v14H6V3Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 3v4h4M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div class="file-bar-info">
+          <strong id="fileBarName">-</strong>
+          <span id="fileBarMeta"></span>
+        </div>
+        <button id="changeFileBtn" class="ghost-button" type="button">Ganti File</button>
+      </div>
+
+      <div class="actions-toolbar hidden">
         <div class="actions">
           <button id="processBtn" class="primary hidden" type="button" aria-hidden="true" tabindex="-1">Proses &amp; Rekapitulasi</button>
         </div>
@@ -846,15 +932,7 @@
       <div id="message" class="message"></div>
     </section>
 
-    <section id="preview" class="panel hidden">
-      <div class="panel-heading">
-        <div>
-          <h2>Hasil SI RENO</h2>
-          <p>Rekapitulasi menjadi tampilan utama. Pindah ke tab Nominatif jika ingin menyiapkan daftar nominatif pencairan.</p>
-        </div>
-        <span class="step-badge">LANGKAH 2</span>
-      </div>
-
+    <section id="preview" class="panel results-panel hidden">
       <div class="si-reno-tabs" role="tablist" aria-label="Modul SI RENO">
         <button type="button" class="si-reno-tab active" data-sireno-tab="rekap" role="tab" aria-selected="true">Rekapitulasi</button>
         <button type="button" class="si-reno-tab" data-sireno-tab="nominatif" role="tab" aria-selected="false">Nominatif</button>
@@ -864,20 +942,23 @@
         <div class="recap-headline">
           <div>
             <h3>Rekapitulasi Keseluruhan Layanan</h3>
-            <p class="small">Rekapitulasi Tahun Berjalan berdasarkan Jenis Permohonan dan Status. Filter bulan dapat digunakan untuk melihat periode tertentu.</p>
+            <p class="small">Jumlah berkas tahun berjalan per jenis permohonan dan status.</p>
           </div>
-          <span id="recapPeriod" class="recap-period">Seluruh Bulan</span>
         </div>
-        <div id="recapMonthPanel" class="recap-month-filter hidden">
-          <label>Filter Bulan Rekapitulasi</label>
-          <div id="recapMonthFilter" class="month-filter"></div>
-          <p class="small">Pilih bulan yang ingin direkap. Default: seluruh bulan pada file.</p>
-        </div>
-        <div class="column-mode-control">
+        <div class="view-toolbar">
+          <div id="recapMonthPanel" class="filter-pop-wrap hidden">
+            <details class="filter-pop">
+              <summary><span class="filter-pop-label">Bulan</span><span id="recapPeriod" class="filter-pop-value">Seluruh Bulan</span></summary>
+              <div class="filter-pop-body">
+                <div id="recapMonthFilter" class="month-filter"></div>
+                <p class="small">Klik dua bulan untuk memilih rentang di antaranya.</p>
+              </div>
+            </details>
+          </div>
           <label class="column-mode-switch" title="Ganti kolom status menjadi kolom bulan">
             <input id="recapMonthColumnsToggle" type="checkbox">
             <span class="column-mode-track" aria-hidden="true"></span>
-            <span>Tampilkan kolom per bulan</span>
+            <span>Kolom per bulan</span>
           </label>
         </div>
         <div id="recapStats" class="stats"></div>
@@ -885,38 +966,51 @@
           <table id="recapTable" class="recap-table"></table>
         </div>
         <div id="recapNote" class="recap-note">
-          Tampilan ini bekerja seperti Pivot Table: setiap jenis layanan direkap menjadi satu baris dan jumlahnya dipecah berdasarkan status. Data Tahun Sebelumnya tidak dimasukkan ke Rekapitulasi.
+          Setiap jenis layanan direkap menjadi satu baris dan dipecah berdasarkan status (seperti Pivot Table). Berkas tahun sebelumnya tidak dimasukkan; lihat tab Nominatif.
         </div>
       </div>
 
       <div id="nominatifTabPanel" class="si-reno-tab-panel hidden">
-        <div class="column-mode-control">
+        <div class="view-toolbar">
+          <div id="monthPanel" class="filter-pop-wrap hidden">
+            <details class="filter-pop">
+              <summary><span class="filter-pop-label">Bulan pencairan</span><span id="nominatifPeriod" class="filter-pop-value">Seluruh Bulan</span></summary>
+              <div class="filter-pop-body">
+                <div id="monthFilter" class="month-filter"></div>
+                <p class="small">Klik dua bulan untuk memilih rentang di antaranya.</p>
+              </div>
+            </details>
+          </div>
           <label class="column-mode-switch" title="Ganti kolom status menjadi kolom bulan">
             <input id="nominatifMonthColumnsToggle" type="checkbox">
             <span class="column-mode-track" aria-hidden="true"></span>
-            <span>Tampilkan kolom per bulan</span>
+            <span>Kolom per bulan</span>
           </label>
         </div>
+
+        <div class="output-panel">
+          <div>
+            <strong>Cetak &amp; Download Nominatif</strong>
+            <p class="small">Format SKPT. Status Ditutup tidak diikutkan secara default; atur status, kolom, kertas, dan penanda tangan di <em>Preview &amp; Cetak</em>.</p>
+          </div>
+          <div class="actions">
+            <button id="printPreviewBtn" class="primary" type="button" disabled>Preview &amp; Cetak</button>
+            <button id="downloadBtn" class="secondary" type="button" disabled>Download Excel</button>
+            <button id="downloadCustomBtn" class="outline-button" type="button" disabled>Download MAK Custom</button>
+          </div>
+        </div>
+
         <div class="stats">
           <div class="stat"><span>Data Terbaca</span><strong id="readCount">0</strong></div>
           <div class="stat current"><span>Tahun Berjalan</span><strong id="currentCount">0</strong></div>
           <div class="stat previous"><span>Tahun Sebelumnya</span><strong id="previousCount">0</strong></div>
           <div class="stat unmapped"><span>Tidak Terklasifikasi</span><strong id="unmappedCount">0</strong></div>
-          <div class="stat period"><span>Periode</span><strong id="periodText">-</strong></div>
+          <div class="stat period"><span>Periode</span><strong id="periodText" class="stat-text">-</strong></div>
           <div class="stat sheets"><span>Sheet Dibuat</span><strong id="sheetCount">0</strong></div>
         </div>
 
-        <div id="monthPanel" class="hidden">
-          <label>Filter Bulan Pencairan</label>
-          <div id="monthFilter" class="month-filter"></div>
-        </div>
-
-        <div class="table-wrap">
-          <div id="summaryTable"></div>
-        </div>
-
-        <details id="unclassifiedDetails" class="hidden">
-          <summary>Detail Tidak Terklasifikasi</summary>
+        <details id="unclassifiedDetails" class="attention-details hidden">
+          <summary>Perlu diklasifikasikan: jenis permohonan yang belum masuk MAK</summary>
           <div class="detail-body">
             <div class="table-wrap">
               <table id="unclassifiedTable"></table>
@@ -932,16 +1026,8 @@
           </div>
         </div>
 
-        <div class="output-panel">
-          <div>
-            <strong>Cetak &amp; Download Nominatif</strong>
-            <p class="small">Format seperti SKPT: tanpa cover, rekap sub layanan ditulis di judul, judul &amp; header tabel tetap terlihat saat digulir, header tabel diulang di setiap halaman, dan semua kolom dimuat selebar kertas. Berkas berstatus Ditutup tidak diikutkan secara default. Atur status, kolom, kertas, dan penanda tangan melalui <em>Preview &amp; Cetak</em>.</p>
-          </div>
-          <div class="actions">
-            <button id="printPreviewBtn" class="primary" type="button" disabled>Preview &amp; Cetak</button>
-            <button id="downloadBtn" class="secondary" type="button" disabled>Download Excel Nominatif</button>
-            <button id="downloadCustomBtn" class="secondary" type="button" disabled>Download MAK Custom</button>
-          </div>
+        <div class="table-wrap">
+          <div id="summaryTable"></div>
         </div>
       </div>
     </section>
@@ -1064,7 +1150,7 @@
   <div id="aboutModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
     <div class="modal" style="max-width:720px;">
       <div class="modal-head">
-        <div><h2 id="aboutTitle">Tentang Aplikasi</h2><p class="small" style="margin:4px 0 0;">Versi 8.13</p></div>
+        <div><h2 id="aboutTitle">Tentang Aplikasi</h2><p class="small" style="margin:4px 0 0;">Versi 8.14</p></div>
         <button id="closeAboutBtn" class="icon-button" type="button" aria-label="Tutup informasi aplikasi">×</button>
       </div>
       <div class="modal-body">
@@ -1297,6 +1383,12 @@
       periodText: document.getElementById('periodText'),
       sheetCount: document.getElementById('sheetCount'),
       monthPanel: document.getElementById('monthPanel'),
+      nominatifPeriod: document.getElementById('nominatifPeriod'),
+      inputPanel: document.getElementById('inputPanel'),
+      fileBar: document.getElementById('fileBar'),
+      fileBarName: document.getElementById('fileBarName'),
+      fileBarMeta: document.getElementById('fileBarMeta'),
+      changeFileBtn: document.getElementById('changeFileBtn'),
       monthFilter: document.getElementById('monthFilter'),
       summaryTable: document.getElementById('summaryTable'),
       unclassifiedDetails: document.getElementById('unclassifiedDetails'),
@@ -1414,22 +1506,35 @@
       els.fileNameText.textContent = file ? file.name : 'Format .xlsx atau .xls';
       if (file) processFile();
     });
-    ['dragenter', 'dragover'].forEach(type => els.uploadZone.addEventListener(type, event => {
-      event.preventDefault();
-      els.uploadZone.classList.add('dragover');
-    }));
-    ['dragleave', 'drop'].forEach(type => els.uploadZone.addEventListener(type, event => {
-      event.preventDefault();
-      els.uploadZone.classList.remove('dragover');
-    }));
-    els.uploadZone.addEventListener('drop', event => {
+    els.changeFileBtn.addEventListener('click', () => els.file.click());
+    [els.uploadZone, els.fileBar].forEach(zone => {
+      ['dragenter', 'dragover'].forEach(type => zone.addEventListener(type, event => {
+        event.preventDefault();
+        zone.classList.add('dragover');
+      }));
+      ['dragleave', 'drop'].forEach(type => zone.addEventListener(type, event => {
+        event.preventDefault();
+        zone.classList.remove('dragover');
+      }));
+      zone.addEventListener('drop', handleFileDrop);
+    });
+    // Popover filter bulan ditutup saat klik di luar atau tekan Escape.
+    document.addEventListener('click', event => {
+      document.querySelectorAll('details.filter-pop[open]').forEach(pop => {
+        if (!pop.contains(event.target)) pop.open = false;
+      });
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') document.querySelectorAll('details.filter-pop[open]').forEach(pop => { pop.open = false; });
+    });
+    function handleFileDrop(event) {
       const file = event.dataTransfer.files && event.dataTransfer.files[0];
       if (!file) return;
       const transfer = new DataTransfer();
       transfer.items.add(file);
       els.file.files = transfer.files;
       els.file.dispatchEvent(new Event('change'));
-    });
+    }
     function normalizeKey(value) {
       return String(value || '').toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
     }
@@ -1750,8 +1855,12 @@
         appState.recapMonthsInitialized = true;
         renderMonthFilter();
         refreshProcessedView();
-        const detected = source.detectedFormat ? ` (format ${source.detectedFormat})` : '';
-        showMessage(`Berhasil memproses ${appState.allRecords.length} baris data dari sheet "${source.sheetName}"${detected}.`, 'success');
+        const detected = source.detectedFormat ? ` · format ${source.detectedFormat}` : '';
+        els.fileBarName.textContent = file.name;
+        els.fileBarMeta.textContent = `${appState.allRecords.length} baris data · sheet "${source.sheetName}"${detected}`;
+        els.fileBar.classList.remove('hidden');
+        els.inputPanel.classList.add('loaded');
+        showToast('File berhasil diproses', `${appState.allRecords.length} baris data dari sheet "${source.sheetName}".`, 'success');
       } catch (error) {
         console.error(error);
         showMessage(error.message || 'Terjadi kesalahan saat memproses file.', 'error');
@@ -2028,6 +2137,7 @@
 
       els.monthPanel.classList.remove('hidden');
       els.monthFilter.innerHTML = monthFilterMarkup(appState.selectedMonths, 'nominatif');
+      updateNominatifPeriodLabel();
     }
 
     function renderRecapMonthFilter() {
@@ -2060,6 +2170,20 @@
           <span class="month-filter-status">${escapeHtml(summary)}</span>
         </div>
         <div class="month-filter-options" data-filter-type="${type}">${options}</div>`;
+    }
+
+    function monthSelectionLabel(selected) {
+      const selectedCount = selected.size;
+      const allCount = appState.availableMonths.length;
+      if (!selectedCount) return 'Belum ada bulan dipilih';
+      if (selectedCount === allCount) return `Seluruh Bulan · ${allCount} bulan`;
+      const keys = appState.availableMonths.filter(key => selected.has(key));
+      if (selectedCount === 1 && keys.length === 1) return monthLabelFromKey(keys[0]);
+      return keys.length ? `${monthLabelFromKey(keys[0])} – ${monthLabelFromKey(keys[keys.length - 1])}` : `${selectedCount} bulan`;
+    }
+
+    function updateNominatifPeriodLabel() {
+      if (els.nominatifPeriod) els.nominatifPeriod.textContent = monthSelectionLabel(appState.selectedMonths);
     }
 
     function updateMonthFilterSummary(container, selectedCount) {
@@ -2125,6 +2249,7 @@
         appState.selectedMonths = new Set(checked);
       }
       updateMonthFilterSummary(els.monthFilter, appState.selectedMonths.size);
+      updateNominatifPeriodLabel();
       refreshProcessedView();
     }
 
@@ -2182,13 +2307,7 @@
       const total = source.length;
       const monthKeys = new Set(source.map(row => row.monthKey).filter(Boolean));
       if (els.recapPeriod) {
-        const selectedCount = appState.selectedRecapMonths.size;
-        const allCount = appState.availableMonths.length;
-        els.recapPeriod.textContent = selectedCount && selectedCount === allCount
-          ? `Seluruh Bulan · ${monthKeys.size} bulan`
-          : selectedCount
-            ? `${selectedCount} Bulan`
-            : 'Belum ada bulan dipilih';
+        els.recapPeriod.textContent = monthSelectionLabel(appState.selectedRecapMonths);
       }
 
       if (els.recapStats) {
@@ -3892,6 +4011,12 @@
     }
 
     function showMessage(text, type) {
+      // Setelah data tampil, panel unggah diringkas sehingga pesan inline
+      // bisa berada jauh di atas layar. Tampilkan sebagai toast agar terlihat.
+      if (els.inputPanel.classList.contains('loaded')) {
+        showToast(type === 'error' ? 'Perhatian' : 'Berhasil', text, type);
+        return;
+      }
       els.message.textContent = text;
       els.message.className = `message ${type}`;
     }
