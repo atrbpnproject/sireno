@@ -810,7 +810,7 @@
           <p class="brand-subtitle">Sistem Informasi Rekapitulasi dan Nominatif</p>
         </div>
       </div>
-      <button id="appVersionBtn" class="version-badge" type="button" aria-haspopup="dialog">Versi 8.12</button>
+      <button id="appVersionBtn" class="version-badge" type="button" aria-haspopup="dialog">Versi 8.13</button>
     </div>
   </header>
 
@@ -935,7 +935,7 @@
         <div class="output-panel">
           <div>
             <strong>Cetak &amp; Download Nominatif</strong>
-            <p class="small">Format seperti SKPT: tanpa cover, rekap sub layanan ditulis di judul, judul &amp; header tabel tetap terlihat saat digulir, header tabel diulang di setiap halaman, dan semua kolom dimuat selebar kertas. Atur kolom, kertas, dan penanda tangan melalui <em>Preview &amp; Cetak</em>.</p>
+            <p class="small">Format seperti SKPT: tanpa cover, rekap sub layanan ditulis di judul, judul &amp; header tabel tetap terlihat saat digulir, header tabel diulang di setiap halaman, dan semua kolom dimuat selebar kertas. Berkas berstatus Ditutup tidak diikutkan secara default. Atur status, kolom, kertas, dan penanda tangan melalui <em>Preview &amp; Cetak</em>.</p>
           </div>
           <div class="actions">
             <button id="printPreviewBtn" class="primary" type="button" disabled>Preview &amp; Cetak</button>
@@ -975,6 +975,11 @@
         <section>
           <div class="print-section-head"><h4>Kolom</h4><button id="resetPrintColumnsBtn" type="button" class="link-button">Kembalikan default</button></div>
           <div id="printColumnOptions"></div>
+        </section>
+        <section>
+          <h4>Status berkas</h4>
+          <div id="printStatusOptions"></div>
+          <p class="small">Secara default status Ditutup tidak diikutkan. Total di judul ikut menyesuaikan.</p>
         </section>
         <section>
           <h4>Layanan yang dicetak</h4>
@@ -1059,7 +1064,7 @@
   <div id="aboutModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
     <div class="modal" style="max-width:720px;">
       <div class="modal-head">
-        <div><h2 id="aboutTitle">Tentang Aplikasi</h2><p class="small" style="margin:4px 0 0;">Versi 8.12</p></div>
+        <div><h2 id="aboutTitle">Tentang Aplikasi</h2><p class="small" style="margin:4px 0 0;">Versi 8.13</p></div>
         <button id="closeAboutBtn" class="icon-button" type="button" aria-label="Tutup informasi aplikasi">×</button>
       </div>
       <div class="modal-body">
@@ -1265,6 +1270,7 @@
       printPageStyle: document.getElementById('printPageStyle'),
       printColumnOptions: document.getElementById('printColumnOptions'),
       printServiceOptions: document.getElementById('printServiceOptions'),
+      printStatusOptions: document.getElementById('printStatusOptions'),
       printPaper: document.getElementById('printPaper'),
       signerJabatan: document.getElementById('signerJabatan'),
       signerNama: document.getElementById('signerNama'),
@@ -3281,6 +3287,8 @@
         paper: 'A4',
         orientation: 'portrait',
         excluded: [],
+        // Secara default berkas berstatus Ditutup tidak masuk daftar nominatif.
+        excludedStatuses: ['Ditutup'],
         signer: { jabatan: '', nama: '', nip: '' }
       };
     }
@@ -3294,6 +3302,7 @@
           ...saved,
           columns: { ...(saved.columns || {}) },
           excluded: Array.isArray(saved.excluded) ? saved.excluded : [],
+          excludedStatuses: Array.isArray(saved.excludedStatuses) ? saved.excludedStatuses : defaults.excludedStatuses,
           signer: { ...defaults.signer, ...(saved.signer || {}) },
           paper: PAPER_SIZES[saved.paper] ? saved.paper : defaults.paper,
           orientation: saved.orientation === 'landscape' ? 'landscape' : 'portrait'
@@ -3399,11 +3408,43 @@
       return sections;
     }
 
+    // Saring berkas menurut status yang dipilih; total dan rekap sub layanan
+    // di judul dihitung ulang dari berkas yang tersisa.
+    function filterSectionByStatus(section) {
+      const excludedStatuses = new Set(appState.printSettings.excludedStatuses);
+      const records = section.records.filter(row => !excludedStatuses.has(row.status));
+      const subs = section.subs
+        .map(sub => {
+          const rows = records.filter(row => (row.subservice || row.serviceName) === sub.name);
+          const split = rows.filter(isPemecahanRow);
+          return { name: sub.name, count: rows.length, bidang: split.length ? sumBidang(split) : null };
+        })
+        .filter(sub => sub.count);
+      return { ...section, records, subs };
+    }
+
+    function statusFilteredSections() {
+      return (appState.nominatifSections || []).map(filterSectionByStatus);
+    }
+
     function selectedNominatifSections({ customOnly = false } = {}) {
       const excluded = new Set(appState.printSettings.excluded);
-      return (appState.nominatifSections || [])
+      return statusFilteredSections()
+        .filter(section => section.records.length)
         .filter(section => !customOnly || section.custom)
         .filter(section => !excluded.has(section.id));
+    }
+
+    function nominatifStatusCounts() {
+      const counts = new Map();
+      (appState.nominatifSections || []).forEach(section => section.records.forEach(row => {
+        counts.set(row.status, (counts.get(row.status) || 0) + 1);
+      }));
+      const rank = status => {
+        const index = BASE_STATUSES.indexOf(status);
+        return index < 0 ? 99 : index;
+      };
+      return Array.from(counts.entries()).sort((a, b) => rank(a[0]) - rank(b[0]) || a[0].localeCompare(b[0], 'id'));
     }
 
     function monthRangeLabel(records) {
@@ -3716,15 +3757,23 @@
         <div class="print-check-group"><span class="print-check-title">${escapeHtml(group.title)}</span>
         ${group.items.map(col => `<label class="print-check"><input type="checkbox" data-print-col="${escapeHtml(col.key)}" ${isPrintColumnOn(col) ? 'checked' : ''}><span>${escapeHtml(col.label)}</span></label>`).join('')}
         </div>`).join('');
-      const excluded = new Set(settings.excluded);
-      els.printServiceOptions.innerHTML = (appState.nominatifSections || []).map(section => `
-        <label class="print-check"><input type="checkbox" data-print-service="${escapeHtml(section.id)}" ${excluded.has(section.id) ? '' : 'checked'}>
-        <span>${escapeHtml(section.name)}${section.custom ? ' (MAK Custom)' : ''} <em>${section.records.length} berkas</em></span></label>`).join('') || '<p class="small">Belum ada data nominatif.</p>';
+      const excludedStatuses = new Set(settings.excludedStatuses);
+      els.printStatusOptions.innerHTML = nominatifStatusCounts().map(([status, count]) => `
+        <label class="print-check"><input type="checkbox" data-print-status="${escapeHtml(status)}" ${excludedStatuses.has(status) ? '' : 'checked'}>
+        <span>${escapeHtml(status)} <em>${count} berkas</em></span></label>`).join('') || '<p class="small">Belum ada data.</p>';
+      renderPrintServiceOptions();
       els.printPaper.value = settings.paper;
       els.printModal.querySelectorAll('[name="printOrientation"]').forEach(input => { input.checked = input.value === settings.orientation; });
       els.signerJabatan.value = settings.signer.jabatan || '';
       els.signerNama.value = settings.signer.nama || '';
       els.signerNip.value = settings.signer.nip || '';
+    }
+
+    function renderPrintServiceOptions() {
+      const excluded = new Set(appState.printSettings.excluded);
+      els.printServiceOptions.innerHTML = statusFilteredSections().filter(section => section.records.length).map(section => `
+        <label class="print-check"><input type="checkbox" data-print-service="${escapeHtml(section.id)}" ${excluded.has(section.id) ? '' : 'checked'}>
+        <span>${escapeHtml(section.name)}${section.custom ? ' (MAK Custom)' : ''} <em>${section.records.length} berkas</em></span></label>`).join('') || '<p class="small">Tidak ada berkas dengan status yang dipilih.</p>';
     }
 
     function renderPrintPreview() {
@@ -3735,7 +3784,7 @@
       els.printPreview.style.setProperty('--paper-margin', `${PRINT_MARGIN_MM}mm`);
       els.printPreview.innerHTML = sections.length
         ? sections.map(section => renderPrintSectionHtml(section, catalog)).join('')
-        : '<div class="print-empty">Pilih minimal satu layanan untuk dicetak.</div>';
+        : '<div class="print-empty">Tidak ada berkas untuk dicetak. Periksa pilihan status dan layanan.</div>';
       els.printPreview.style.zoom = '';
       fitPrintTables();
       // Perkecil tampilan preview agar satu lebar kertas terlihat utuh di layar.
@@ -3748,7 +3797,8 @@
       }
       const totalRows = sections.reduce((sum, section) => sum + section.records.length, 0);
       const paperLabel = (PAPER_SIZES[appState.printSettings.paper] || PAPER_SIZES.A4).label.split(' (')[0];
-      els.printModalInfo.textContent = `${sections.length} layanan · ${totalRows} berkas · ${paperLabel} ${appState.printSettings.orientation === 'landscape' ? 'Landscape' : 'Portrait'} · header tabel diulang di setiap halaman`;
+      const hiddenStatuses = appState.printSettings.excludedStatuses.length ? ` · tanpa status ${appState.printSettings.excludedStatuses.join(', ')}` : '';
+      els.printModalInfo.textContent = `${sections.length} layanan · ${totalRows} berkas${hiddenStatuses} · ${paperLabel} ${appState.printSettings.orientation === 'landscape' ? 'Landscape' : 'Portrait'} · header tabel diulang di setiap halaman`;
       els.printNowBtn.disabled = !sections.length;
       els.printDownloadBtn.disabled = !sections.length;
       els.printPageStyle.textContent = `@page { size: ${width}mm ${height}mm; margin: ${PRINT_MARGIN_MM}mm; }`;
@@ -3808,6 +3858,12 @@
       const settings = appState.printSettings;
       if (target.matches('[data-print-col]')) {
         settings.columns[target.dataset.printCol] = target.checked;
+      } else if (target.matches('[data-print-status]')) {
+        const excludedStatuses = new Set(settings.excludedStatuses);
+        if (target.checked) excludedStatuses.delete(target.dataset.printStatus);
+        else excludedStatuses.add(target.dataset.printStatus);
+        settings.excludedStatuses = Array.from(excludedStatuses);
+        renderPrintServiceOptions();
       } else if (target.matches('[data-print-service]')) {
         const excluded = new Set(settings.excluded);
         if (target.checked) excluded.delete(target.dataset.printService);
