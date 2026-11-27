@@ -730,6 +730,67 @@
       .month-filter-status { width:100%; margin-left:0; }
     }
 
+    /* Cetak & Download Nominatif (format SKPT) */
+    .output-panel { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:14px; margin-top:16px; padding:14px 16px; border:1px solid #d5e2ef; border-radius:10px; background:#f7fafd; }
+    .output-panel > div:first-child { flex:1 1 420px; }
+    .output-panel p { margin:4px 0 0; }
+    .output-panel .actions { margin-top:0; }
+    body.print-modal-open { overflow:hidden; }
+    .print-modal { position:fixed; inset:0; z-index:40; display:flex; flex-direction:column; background:#e5eaf0; }
+    .print-modal.hidden { display:none; }
+    .print-modal-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; padding:12px 18px; background:#fff; border-bottom:1px solid var(--line); }
+    .print-modal-head h2 { margin:0; font-size:18px; color:var(--navy); }
+    .print-modal-head p { margin:2px 0 0; }
+    .print-modal-head .actions { margin-top:0; align-items:center; }
+    .print-modal-body { flex:1; display:flex; min-height:0; }
+    .print-settings { width:300px; flex:0 0 300px; overflow:auto; background:#fff; border-right:1px solid var(--line); padding:6px 16px 20px; }
+    .print-settings section { padding:12px 0; border-bottom:1px solid #edf1f6; }
+    .print-settings h4 { margin:0 0 8px; font-size:13px; color:var(--navy); text-transform:uppercase; letter-spacing:.03em; }
+    .print-section-head { display:flex; justify-content:space-between; align-items:center; }
+    .link-button { background:none !important; border:0; color:var(--blue); padding:0; font-size:12px; box-shadow:none !important; text-decoration:underline; cursor:pointer; }
+    .print-field { display:block; font-size:12px; color:var(--muted); margin:0 0 8px; }
+    .print-field select, .print-field input { display:block; width:100%; margin-top:4px; padding:7px 9px; border:1px solid #cbd6e2; border-radius:6px; font:inherit; font-size:13px; color:var(--text); }
+    .print-orientation { display:flex; gap:16px; font-size:13px; margin:4px 0 6px; }
+    .print-check-group { margin-bottom:8px; }
+    .print-check-title { display:block; font-size:11px; color:var(--muted); margin:4px 0; }
+    .print-check { display:flex; gap:8px; align-items:flex-start; font-size:13px; padding:3px 0; cursor:pointer; }
+    .print-check input { margin-top:2px; }
+    .print-check em { color:var(--muted); font-style:normal; font-size:11px; }
+    .print-preview-scroll { flex:1; overflow:auto; padding:22px; }
+    #printPreview { --paper-width:210mm; --paper-margin:10mm; }
+    #printPreview .print-sheet { width:var(--paper-width); margin:0 auto 22px; padding:var(--paper-margin); background:#fff; box-shadow:0 4px 18px rgba(15,35,58,.18); }
+    .print-empty { text-align:center; color:var(--muted); padding:40px; }
+    .print-sheet { font-family:Arial, Helvetica, sans-serif; color:#000; font-size:var(--print-font, 10pt); }
+    .print-title { text-align:center; margin-bottom:4mm; }
+    .print-title div { font-weight:700; line-height:1.3; }
+    .print-title .t0 { font-size:calc(var(--print-font, 10pt) * 1.4); }
+    .print-title .t1, .print-title .t2 { font-size:calc(var(--print-font, 10pt) * 1.2); }
+    .print-title .t3 { font-size:calc(var(--print-font, 10pt) * 1.1); }
+    .print-title .normal { font-weight:400; font-size:var(--print-font, 10pt); }
+    .print-table { width:100%; border-collapse:collapse; table-layout:auto; overflow:visible; border-radius:0; box-shadow:none; background:#fff; margin:0; }
+    .print-table th, .print-table td { border:1px solid #000; padding:1mm 1.3mm; vertical-align:middle; line-height:1.25; font-size:var(--print-font, 10pt); text-align:left; }
+    .print-table th { background:#1f4e78 !important; color:#fff; font-weight:700; text-align:center; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    #printPreview .print-table thead th { position:sticky; top:-22px; z-index:1; }
+    .print-table td.c { text-align:center; }
+    .print-table tr { break-inside:avoid; page-break-inside:avoid; }
+    .print-signature { width:50%; margin:6mm 0 0 auto; text-align:center; break-inside:avoid; page-break-inside:avoid; }
+    .print-signature .space { height:18mm; }
+    .print-signature .name { font-weight:700; text-decoration:underline; }
+    #printArea { display:none; }
+    @media (max-width: 860px) {
+      .print-modal-body { flex-direction:column; }
+      .print-settings { width:auto; flex:0 0 auto; max-height:42vh; border-right:0; border-bottom:1px solid var(--line); }
+    }
+    @media print {
+      body.printing-nominatif { background:#fff !important; }
+      body.printing-nominatif > *:not(#printArea) { display:none !important; }
+      body.printing-nominatif #printArea { display:block !important; }
+      #printArea .print-sheet { width:auto; margin:0; padding:0; box-shadow:none; break-after:page; page-break-after:always; }
+      #printArea .print-sheet:last-child { break-after:auto; page-break-after:auto; }
+      #printArea .print-table thead { display:table-header-group; }
+      #printArea .print-table th { position:static !important; }
+    }
+
 </style>
 </head>
 <body>
@@ -749,7 +810,7 @@
           <p class="brand-subtitle">Sistem Informasi Rekapitulasi dan Nominatif</p>
         </div>
       </div>
-      <button id="appVersionBtn" class="version-badge" type="button" aria-haspopup="dialog">Versi 8.11</button>
+      <button id="appVersionBtn" class="version-badge" type="button" aria-haspopup="dialog">Versi 8.12</button>
     </div>
   </header>
 
@@ -871,18 +932,69 @@
           </div>
         </div>
 
-        <div class="actions-toolbar" style="margin-top:16px;">
+        <div class="output-panel">
+          <div>
+            <strong>Cetak &amp; Download Nominatif</strong>
+            <p class="small">Format seperti SKPT: tanpa cover, rekap sub layanan ditulis di judul, judul &amp; header tabel tetap terlihat saat digulir, header tabel diulang di setiap halaman, dan semua kolom dimuat selebar kertas. Atur kolom, kertas, dan penanda tangan melalui <em>Preview &amp; Cetak</em>.</p>
+          </div>
           <div class="actions">
+            <button id="printPreviewBtn" class="primary" type="button" disabled>Preview &amp; Cetak</button>
             <button id="downloadBtn" class="secondary" type="button" disabled>Download Excel Nominatif</button>
             <button id="downloadCustomBtn" class="secondary" type="button" disabled>Download MAK Custom</button>
           </div>
-          <span class="small">Output pencairan tersedia setelah data berhasil diproses.</span>
         </div>
       </div>
     </section>
 
   </main>
 
+
+  <div id="printModal" class="print-modal hidden" role="dialog" aria-modal="true" aria-labelledby="printModalTitle">
+    <div class="print-modal-head">
+      <div>
+        <h2 id="printModalTitle">Preview Cetak Nominatif</h2>
+        <p id="printModalInfo" class="small"></p>
+      </div>
+      <div class="actions">
+        <button id="printNowBtn" class="primary" type="button">Cetak</button>
+        <button id="printDownloadBtn" class="secondary" type="button">Download Excel</button>
+        <button id="closePrintBtn" class="icon-button" type="button" aria-label="Tutup preview">×</button>
+      </div>
+    </div>
+    <div class="print-modal-body">
+      <aside class="print-settings">
+        <section>
+          <h4>Kertas</h4>
+          <label class="print-field">Ukuran kertas<select id="printPaper"></select></label>
+          <div class="print-orientation">
+            <label><input type="radio" name="printOrientation" value="portrait"> Portrait</label>
+            <label><input type="radio" name="printOrientation" value="landscape"> Landscape</label>
+          </div>
+          <p class="small">Lebar kolom otomatis menyesuaikan lebar kertas, jadi tidak ada kolom yang terpotong.</p>
+        </section>
+        <section>
+          <div class="print-section-head"><h4>Kolom</h4><button id="resetPrintColumnsBtn" type="button" class="link-button">Kembalikan default</button></div>
+          <div id="printColumnOptions"></div>
+        </section>
+        <section>
+          <h4>Layanan yang dicetak</h4>
+          <div id="printServiceOptions"></div>
+        </section>
+        <section>
+          <h4>Penanda Tangan</h4>
+          <label class="print-field">Jabatan<input id="signerJabatan" type="text" placeholder="KEPALA SEKSI ..."></label>
+          <label class="print-field">Nama<input id="signerNama" type="text" placeholder="Nama lengkap dan gelar"></label>
+          <label class="print-field">NIP<input id="signerNip" type="text" inputmode="numeric" placeholder="NIP"></label>
+          <p class="small">Disimpan di browser ini dan ikut ke sheet REFERENSI pada file Excel.</p>
+        </section>
+      </aside>
+      <div class="print-preview-scroll">
+        <div id="printPreview"></div>
+      </div>
+    </div>
+  </div>
+  <div id="printArea" aria-hidden="true"></div>
+  <style id="printPageStyle"></style>
   <div id="detailModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
     <div class="modal">
       <div class="modal-head">
@@ -947,7 +1059,7 @@
   <div id="aboutModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
     <div class="modal" style="max-width:720px;">
       <div class="modal-head">
-        <div><h2 id="aboutTitle">Tentang Aplikasi</h2><p class="small" style="margin:4px 0 0;">Versi 8.11</p></div>
+        <div><h2 id="aboutTitle">Tentang Aplikasi</h2><p class="small" style="margin:4px 0 0;">Versi 8.12</p></div>
         <button id="closeAboutBtn" class="icon-button" type="button" aria-label="Tutup informasi aplikasi">×</button>
       </div>
       <div class="modal-body">
@@ -955,7 +1067,7 @@
         <div class="about-list">
           <div class="about-item"><strong>Pengolahan data</strong><span>Membaca Excel pendapatan harian, mengelompokkan layanan ke MAK dan sublayanan, serta menampilkan status berkas.</span></div>
           <div class="about-item"><strong>Periode dan monitoring</strong><span>Memfilter data per bulan, merangkum tahun berjalan, dan memantau backlog tahun sebelumnya.</span></div>
-          <div class="about-item"><strong>Eviden pencairan</strong><span>Menyusun daftar nominatif, ringkasan volume, dan file Excel siap diunduh.</span></div>
+          <div class="about-item"><strong>Eviden pencairan</strong><span>Menyusun daftar nominatif format SKPT (tanpa cover, rekap sub layanan di judul), siap dicetak langsung dari web atau diunduh sebagai Excel.</span></div>
           <div class="about-item"><strong>Pemecahan Bidang</strong><span>Khusus sublayanan Pemecahan Bidang, aplikasi dapat memperoleh jumlah bidang melalui ekstensi setelah pengguna login ke ATR/BPN.</span></div>
         </div>
       </div>
@@ -1062,6 +1174,55 @@
       }
     ];
 
+    const PRINT_SETTINGS_KEY = 'sirenoPrintSettings';
+    const EXCELJS_URLS = [
+      'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js',
+      'https://unpkg.com/exceljs@4.4.0/dist/exceljs.min.js'
+    ];
+    const PAPER_SIZES = {
+      A4: { label: 'A4 (210 × 297 mm)', w: 210, h: 297, excel: 9 },
+      F4: { label: 'F4 / Folio (215 × 330 mm)', w: 215, h: 330, excel: 14 },
+      LEGAL: { label: 'Legal (216 × 356 mm)', w: 216, h: 356, excel: 5 }
+    };
+    const PRINT_MARGIN_MM = 10;
+    // Nama sheet singkat seperti pada file SKPT (mis. "NOMINATIF PTPK").
+    const NOMINATIF_SHEET_LABELS = {
+      '6415.BAH.001': 'SK HAK PERORANGAN',
+      '7973.BAB.001': 'SK HAK INSTANSI',
+      '7971.BAH.001': 'PTPK',
+      '7971.BAH.002': 'SKPT',
+      '7971.BAH.003': 'PENGECEKAN',
+      '7971.BAH.004': 'PEMECAHAN',
+      '7971.BAH.005': 'PEMELIHARAAN DATA',
+      '7971.BAH.006': 'SERTIPIKAT HILANG',
+      '7971.ADI.003': 'SERTIFIKASI PPAT'
+    };
+    const HEADER_FILL = '1F4E78';
+
+    // Kolom bawaan mengikuti file SKPT. Kolom dengan defaultOn=false dapat
+    // ditambahkan dari pengaturan cetak.
+    const BASE_PRINT_COLUMNS = [
+      { key: 'no', label: 'No.', width: 6, align: 'center', defaultOn: true, value: (row, index) => index + 1 },
+      { key: 'applicant', label: 'Nama Pemohon', width: 32, defaultOn: true, value: row => row.applicant },
+      { key: 'jenis', label: 'Jenis Layanan', width: 40, defaultOn: true, value: row => row.jenis },
+      { key: 'subservice', label: 'Sub Layanan', width: 30, defaultOn: false, value: row => detailSubservice(row) },
+      { key: 'mak', label: 'Kode MAK', width: 15, align: 'center', defaultOn: false, value: row => row.code },
+      { key: 'tanggal', label: 'Tanggal', width: 12, align: 'center', defaultOn: false, value: row => formatDateId(row.date) },
+      { key: 'bulan', label: 'Bulan', width: 15, align: 'center', defaultOn: true, value: row => formatMonthKey(row.monthKey) },
+      { key: 'nomorBerkas', label: 'Nomor Berkas', width: 15, align: 'center', defaultOn: true, value: row => row.nomorBerkas },
+      { key: 'jumlahBidang', label: 'Jumlah Bidang', width: 9, align: 'center', defaultOn: true, pemecahanOnly: true, value: row => (isPemecahanRow(row) ? (row.jumlahBidang ?? '') : '') },
+      { key: 'volume', label: 'Volume Pencairan', width: 10, align: 'center', defaultOn: true, pemecahanOnly: true, value: row => rowVolume(row) },
+      { key: 'satuan', label: 'Satuan', width: 9, align: 'center', defaultOn: true, pemecahanOnly: true, value: row => rowUnit(row) },
+      { key: 'status', label: 'Status', width: 13, align: 'center', defaultOn: true, value: row => row.status }
+    ];
+
+    const THIN_BORDER = {
+      top: { style: 'thin', color: { argb: 'FF000000' } },
+      left: { style: 'thin', color: { argb: 'FF000000' } },
+      bottom: { style: 'thin', color: { argb: 'FF000000' } },
+      right: { style: 'thin', color: { argb: 'FF000000' } }
+    };
+
     const BASE_STATUSES = ['Selesai', 'Diproses', 'Ditutup', 'Ditunda', 'Diserahkan'];
     const MONTHS = ['JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI', 'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'];
     const MANUAL_STORAGE_KEY = 'daftarNominatifManualMappings';
@@ -1071,10 +1232,11 @@
     const appState = {
       allRecords: [],
       processed: null,
-      outputWorkbook: null,
       outputFileName: '',
-      customWorkbook: null,
       customFileName: '',
+      nominatifSections: [],
+      sourceColumns: {},
+      printSettings: loadPrintSettings(),
       selectedMonths: new Set(),
       selectedRecapMonths: new Set(),
       recapMonthsInitialized: false,
@@ -1095,6 +1257,22 @@
       processBtn: document.getElementById('processBtn'),
       downloadBtn: document.getElementById('downloadBtn'),
       downloadCustomBtn: document.getElementById('downloadCustomBtn'),
+      printPreviewBtn: document.getElementById('printPreviewBtn'),
+      printModal: document.getElementById('printModal'),
+      printModalInfo: document.getElementById('printModalInfo'),
+      printPreview: document.getElementById('printPreview'),
+      printArea: document.getElementById('printArea'),
+      printPageStyle: document.getElementById('printPageStyle'),
+      printColumnOptions: document.getElementById('printColumnOptions'),
+      printServiceOptions: document.getElementById('printServiceOptions'),
+      printPaper: document.getElementById('printPaper'),
+      signerJabatan: document.getElementById('signerJabatan'),
+      signerNama: document.getElementById('signerNama'),
+      signerNip: document.getElementById('signerNip'),
+      printNowBtn: document.getElementById('printNowBtn'),
+      printDownloadBtn: document.getElementById('printDownloadBtn'),
+      closePrintBtn: document.getElementById('closePrintBtn'),
+      resetPrintColumnsBtn: document.getElementById('resetPrintColumnsBtn'),
       message: document.getElementById('message'),
       preview: document.getElementById('preview'),
       recapTable: document.getElementById('recapTable'),
@@ -1152,6 +1330,16 @@
     els.processBtn.addEventListener('click', processFile);
     els.downloadBtn.addEventListener('click', downloadWorkbook);
     els.downloadCustomBtn.addEventListener('click', downloadCustomWorkbook);
+    els.printPreviewBtn.addEventListener('click', openPrintModal);
+    els.closePrintBtn.addEventListener('click', closePrintModal);
+    els.printNowBtn.addEventListener('click', printNominatif);
+    els.printDownloadBtn.addEventListener('click', () => downloadNominatifExcel({ button: els.printDownloadBtn }));
+    els.resetPrintColumnsBtn.addEventListener('click', resetPrintColumns);
+    els.printModal.addEventListener('change', handlePrintSettingChange);
+    els.printModal.addEventListener('input', event => {
+      if (event.target.matches('input[type="text"]')) handlePrintSettingChange(event);
+    });
+    els.printPaper.innerHTML = Object.entries(PAPER_SIZES).map(([key, paper]) => `<option value="${key}">${paper.label}</option>`).join('');
     els.monthFilter.addEventListener('change', handleMonthChange);
     els.recapMonthFilter.addEventListener('change', handleRecapMonthChange);
     els.monthFilter.addEventListener('click', event => handleMonthFilterAction(event, 'nominatif'));
@@ -1209,6 +1397,7 @@
     });
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && !els.aboutModal.classList.contains('hidden')) els.aboutModal.classList.add('hidden');
+      if (event.key === 'Escape' && !els.printModal.classList.contains('hidden')) closePrintModal();
     });
     window.addEventListener('message', handleExtensionMessage);
     pingExtension();
@@ -1542,13 +1731,13 @@
       els.processBtn.textContent = 'Menganalisis...';
       els.downloadBtn.disabled = true;
       els.downloadCustomBtn.disabled = true;
-      appState.outputWorkbook = null;
-      appState.customWorkbook = null;
+      els.printPreviewBtn.disabled = true;
 
       try {
         const data = await file.arrayBuffer();
         const workbook = XLSX.read(data, { type: 'array', cellDates: true });
         const source = readSourceRows(workbook);
+        appState.sourceColumns = source.columns;
         appState.allRecords = buildAllRecords(source.rows, source.columns, source.headers, source.headerRowIndex);
         appState.availableMonths = getAvailableMonths(appState.allRecords);
         appState.selectedMonths = new Set(appState.availableMonths);
@@ -1556,7 +1745,6 @@
         appState.recapMonthsInitialized = true;
         renderMonthFilter();
         refreshProcessedView();
-        els.downloadBtn.disabled = false;
         const detected = source.detectedFormat ? ` (format ${source.detectedFormat})` : '';
         showMessage(`Berhasil memproses ${appState.allRecords.length} baris data dari sheet "${source.sheetName}"${detected}.`, 'success');
       } catch (error) {
@@ -1720,18 +1908,21 @@
 
     function refreshProcessedView() {
       const processed = buildProcessedData(getFilteredRecords());
-      const outputWorkbook = buildOutputWorkbook(processed);
-      const customWorkbook = buildCustomWorkbook(processed);
-
       appState.processed = processed;
-      appState.outputWorkbook = outputWorkbook;
+      appState.nominatifSections = buildNominatifSections(processed);
       appState.outputFileName = `Daftar_Nominatif_Pencairan_${processed.period.filePeriod}.xlsx`;
-      appState.customWorkbook = customWorkbook;
       appState.customFileName = `Ekstrak_MAK_Custom_${processed.period.filePeriod}.xlsx`;
 
-      renderPreview(processed, outputWorkbook.SheetNames.length);
-      els.downloadBtn.disabled = !processed.records.length;
+      const sectionCount = appState.nominatifSections.length;
+      // Jumlah sheet = satu sheet per layanan + sheet REFERENSI penanda tangan.
+      renderPreview(processed, sectionCount ? sectionCount + 1 : 0);
+      els.downloadBtn.disabled = !sectionCount;
+      els.printPreviewBtn.disabled = !sectionCount;
       els.downloadCustomBtn.disabled = !processed.customRecords.length;
+      if (!els.printModal.classList.contains('hidden')) {
+        renderPrintSettingsPanel();
+        renderPrintPreview();
+      }
     }
 
     function rebuildRecordsWithManualMappings() {
@@ -3009,289 +3200,8 @@
     }
 
 
-    function addReferenceSheet(wb) {
-      const aoa = [
-        ['REFERENSI DATA PENANDA TANGAN'],
-        ['Isi data pada kolom B. Seluruh sheet NOMINATIF menggunakan referensi dari sheet ini.'],
-        [],
-        ['Nama Penanda Tangan', ''],
-        ['NIP Penanda Tangan', ''],
-        ['Jabatan Penanda Tangan', ''],
-        [],
-        ['PETUNJUK'],
-        ['1. Isi atau ubah data pada sel B4:B6.'],
-        ['2. Jangan mengubah nama sheet REFERENSI.'],
-        ['3. Perubahan data pada sheet REFERENSI akan menjadi sumber seluruh tanda tangan pada sheet NOMINATIF.']
-      ];
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      mergeRow(ws, 0, 2);
-      mergeRow(ws, 1, 2);
-      applyReferenceStyle(ws, aoa.length, 2);
-      ws['!cols'] = makeCols([34, 58]);
-      ws['!freeze'] = { xSplit: 0, ySplit: 3 };
-      XLSX.utils.book_append_sheet(wb, ws, 'REFERENSI');
-    }
-
     function referenceFormula(cellRef) {
       return { f: "'REFERENSI'!" + cellRef };
-    }
-
-    function applyReferenceStyle(ws, rowCount, colCount) {
-      for (let r = 0; r < rowCount; r++) {
-        for (let c = 0; c < colCount; c++) {
-          const cell = ws[XLSX.utils.encode_cell({ r, c })];
-          if (!cell) continue;
-          cell.s = baseCellStyle();
-          if (r === 0) {
-            cell.s.font = { name: 'Arial', sz: 14, bold: true, color: { rgb: '12345A' } };
-            cell.s.alignment = { horizontal: 'center', vertical: 'center' };
-            cell.s.border = {};
-          } else if (r === 1) {
-            cell.s.font = { name: 'Arial', sz: 10, italic: true, color: { rgb: '5D7690' } };
-            cell.s.alignment = { horizontal: 'center', vertical: 'center', wrapText: true };
-            cell.s.border = {};
-          } else if (r >= 3 && r <= 5 && c === 0) {
-            cell.s.font = { name: 'Arial', sz: 10, bold: true };
-            cell.s.fill = { fgColor: { rgb: 'DDEBFA' } };
-          } else if (r >= 3 && r <= 5 && c === 1) {
-            cell.s.fill = { fgColor: { rgb: 'FFF7D6' } };
-          } else if (r === 7) {
-            cell.s.font = { name: 'Arial', sz: 10, bold: true };
-            cell.s.fill = { fgColor: { rgb: 'EAF3FC' } };
-          }
-        }
-      }
-    }
-
-    function buildOutputWorkbook(processed) {
-      const wb = XLSX.utils.book_new();
-      addReferenceSheet(wb);
-      addRekapSheetsByYear(wb, processed);
-      MAK_DEFINITIONS.forEach(def => addCoverSheet(wb, processed, def));
-      MAK_DEFINITIONS.forEach(def => addNominativeSheets(wb, processed, def));
-      addCustomSheets(wb, processed);
-      if (processed.unclassified.length) addUnclassifiedSheet(wb, processed);
-      wb.Workbook = wb.Workbook || {};
-      wb.Workbook.CalcPr = { calcMode: 'auto', fullCalcOnLoad: true, forceFullCalc: true };
-      return wb;
-    }
-
-    function buildCustomWorkbook(processed) {
-      const wb = XLSX.utils.book_new();
-      if (processed.customRecords.length) {
-        addCustomRekapSheet(wb, processed);
-        addCustomSheets(wb, processed);
-      }
-      return wb;
-    }
-
-    function addRekapSheetsByYear(wb, processed) {
-      addRekapSheetForYear(wb, processed.currentYearRecords, 'TAHUN BERJALAN', processed.summary.statuses, 'REKAP TAHUN BERJALAN');
-
-      const previousGroups = groupRecordsByYear(processed.previousYearRecords);
-      if (previousGroups.size) {
-        addPreviousYearsRekapSheet(wb, previousGroups, processed.summary.statuses);
-      }
-    }
-
-    function addPreviousYearsRekapSheet(wb, yearGroups, statuses) {
-      const aoa = [];
-      yearGroups.forEach((records, year) => {
-        const summary = summarize(records);
-        if (aoa.length) aoa.push([]);
-        aoa.push([`KELOMPOK BERKAS TAHUN ${year}`]);
-        aoa.push(['Kode MAK', 'Kelompok Kegiatan / Sub Layanan', 'Jumlah', ...statuses]);
-        summary.byMak.forEach(group => {
-          if (!group.count) return;
-          aoa.push([group.code, group.name, group.count, ...statuses.map(status => group.statuses[status] || 0)]);
-          group.sub.forEach(sub => {
-            if (!sub.count) return;
-            const note = sub.name === 'Pemecahan Bidang' ? ' (jumlah bidang dari hasil pengecekan ATR/BPN)' : '';
-            aoa.push(['', `-> ${sub.name}${note}`, sub.count, ...statuses.map(status => sub.statuses[status] || 0)]);
-          });
-        });
-        summary.customByMak.forEach(group => {
-          if (!group.count) return;
-          aoa.push([group.code, `${group.name} (MAK Custom)`, group.count, ...statuses.map(status => group.statuses[status] || 0)]);
-        });
-        aoa.push(['', `GRAND TOTAL BERKAS TAHUN ${year}`, summary.grand.count, ...statuses.map(status => summary.grand.statuses[status] || 0)]);
-      });
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      ws['!cols'] = makeCols([18, 70, 12, ...statuses.map(() => 13)]);
-      XLSX.utils.book_append_sheet(wb, ws, 'REKAP TAHUN SEBELUMNYA');
-    }
-
-    function addRekapSheetForYear(wb, records, year, statuses, sheetName = '') {
-      const summary = summarize(records);
-      const aoa = [['Kode MAK', 'Kelompok Kegiatan / Sub Layanan', 'Jumlah', ...statuses]];
-      summary.byMak.forEach(group => {
-        if (!group.count) return;
-        aoa.push([group.code, group.name, group.count, ...statuses.map(status => group.statuses[status] || 0)]);
-        group.sub.forEach(sub => {
-          if (!sub.count) return;
-          const note = sub.name === 'Pemecahan Bidang' ? ' (jumlah bidang dari hasil pengecekan ATR/BPN)' : '';
-          aoa.push(['', `-> ${sub.name}${note}`, sub.count, ...statuses.map(status => sub.statuses[status] || 0)]);
-        });
-      });
-      summary.customByMak.forEach(group => {
-        if (!group.count) return;
-        aoa.push([group.code, `${group.name} (MAK Custom)`, group.count, ...statuses.map(status => group.statuses[status] || 0)]);
-      });
-      aoa.push(['', `GRAND TOTAL TAHUN ${year}`, summary.grand.count, ...statuses.map(status => summary.grand.statuses[status] || 0)]);
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      applyTableStyle(ws, aoa.length, aoa[0].length);
-      ws['!cols'] = makeCols([18, 70, 12, ...statuses.map(() => 13)]);
-      XLSX.utils.book_append_sheet(wb, ws, cleanSheetName(sheetName || `REKAP ${year}`));
-    }
-
-    function addCustomRekapSheet(wb, processed) {
-      const statuses = processed.summary.statuses;
-      const aoa = [['Kode MAK', 'Uraian', 'Jumlah', ...statuses]];
-      processed.summary.customByMak.forEach(group => {
-        if (!group.count) return;
-        aoa.push([group.code, group.name, group.count, ...statuses.map(status => group.statuses[status] || 0)]);
-      });
-      const total = processed.customRecords.length;
-      aoa.push(['', 'TOTAL MAK CUSTOM', total, ...statuses.map(status => processed.customRecords.filter(row => row.status === status).length)]);
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      applyTableStyle(ws, aoa.length, aoa[0].length);
-      ws['!cols'] = makeCols([18, 70, 12, ...statuses.map(() => 13)]);
-      XLSX.utils.book_append_sheet(wb, ws, 'REKAP MAK CUSTOM');
-    }
-
-    function addCoverSheet(wb, processed, def) {
-      const currentSummary = processed.currentYearSummary;
-      const group = currentSummary.byMak.get(def.code);
-      const subRows = def.subservices.length
-        ? def.subservices.flatMap(sub => {
-          const item = group.sub.get(sub);
-          const currentRecords = item ? item.records : [];
-          const amount = def.code === '7971.BAH.004' && sub === 'Pemecahan Bidang'
-            ? `${currentRecords.reduce((sum, row) => sum + (Number(row.jumlahBidang) || 0), 0) || '........'} bidang`
-            : `${currentRecords.length} berkas`;
-          return [[sub, amount]];
-        })
-        : [[def.name, `${group.count} berkas`]];
-
-      const bidangTotal = def.code === '7971.BAH.004'
-        ? Array.from(group.sub.values()).flatMap(item => item.records).reduce((sum, row) => sum + (Number(row.jumlahBidang) || 0), 0)
-        : 0;
-      const nonPemecahanTotal = def.code === '7971.BAH.004'
-        ? Array.from(group.sub.values()).flatMap(item => item.records).filter(row => !isPemecahanRow(row)).length
-        : 0;
-      const totalText = def.code === '7971.BAH.004'
-        ? `${nonPemecahanTotal} berkas + ${bidangTotal || '........'} bidang`
-        : `${group.count} berkas`;
-      const aoa = [
-        [def.code],
-        [def.name],
-        [`Periode ${processed.period.shortLabel}`],
-        [],
-        ['Uraian', 'Jumlah'],
-        ...subRows,
-        ['TOTAL', totalText]
-      ];
-      if (def.code === '7971.BAH.004') {
-        aoa.push([]);
-        aoa.push(['Catatan', 'Jumlah Pemecahan Bidang diperoleh dari pengecekan otomatis Informasi Berkas ATR/BPN.']);
-      }
-
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      mergeRow(ws, 0, 2);
-      mergeRow(ws, 1, 2);
-      mergeRow(ws, 2, 2);
-      applyCoverStyle(ws, aoa.length);
-      ws['!cols'] = makeCols([58, 28]);
-      XLSX.utils.book_append_sheet(wb, ws, def.cover);
-    }
-
-    function addNominativeSheets(wb, processed, def) {
-      const group = processed.currentYearSummary.byMak.get(def.code);
-      if (!group || !group.count) return;
-      const targets = def.subservices.length
-        ? def.subservices.map(sub => ({ name: sub, records: (group.sub.get(sub) || { records: [] }).records }))
-        : [{ name: def.name, records: Array.from(group.sub.values()).flatMap(item => item.records) }];
-
-      targets.forEach(target => {
-        if (!target.records.length) return;
-        addNominativeSheet(wb, processed, target.name, target.records, def.short, target.name === 'Pemecahan Bidang');
-      });
-    }
-
-    function addCustomSheets(wb, processed) {
-      processed.summary.customByMak.forEach(group => {
-        if (!group.count) return;
-        addNominativeSheet(wb, processed, group.name, group.records, group.code, false);
-      });
-    }
-
-    function addNominativeSheet(wb, processed, title, records, short, hasBidang) {
-      records = sortDetailRecords(records);
-      const hasVolumeUnit = short === '004';
-      const header = hasVolumeUnit
-        ? ['No.', 'NAMA PEMOHON', 'JENIS PERMOHONAN', 'BULAN', 'NOMOR BERKAS', 'VOLUME PENCAIRAN', 'SATUAN']
-        : ['No.', 'NAMA PEMOHON', 'JENIS PERMOHONAN', 'BULAN', 'NOMOR BERKAS'];
-      const width = header.length;
-      const signatureStart = hasBidang ? Math.max(0, width - 3) : Math.max(0, width - 2);
-      const signatureRow = text => {
-        const row = Array(width).fill('');
-        row[signatureStart] = text;
-        return row;
-      };
-      const aoa = [
-        ['DAFTAR NOMINATIF'],
-        [title.toUpperCase()],
-        [processed.period.label],
-        [],
-        header,
-        ...records.map((row, index) => {
-          const base = [index + 1, row.applicant, row.jenis, formatMonthKey(row.monthKey), row.nomorBerkas];
-          return hasVolumeUnit ? [...base, rowVolume(row), rowUnit(row)] : base;
-        }),
-        [],
-        signatureRow('Mengetahui,'),
-        signatureRow(''),
-        [],
-        [],
-        [],
-        signatureRow(''),
-        signatureRow('')
-      ];
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      mergeRow(ws, 0, width);
-      mergeRow(ws, 1, width);
-      mergeRow(ws, 2, width);
-      [records.length + 6, records.length + 7, records.length + 11, records.length + 12]
-        .forEach(rowIndex => mergeCells(ws, rowIndex, signatureStart, rowIndex, width - 1));
-      ws[XLSX.utils.encode_cell({ r: records.length + 7, c: signatureStart })] = referenceFormula('$B$6');
-      ws[XLSX.utils.encode_cell({ r: records.length + 11, c: signatureStart })] = referenceFormula('$B$4');
-      ws[XLSX.utils.encode_cell({ r: records.length + 12, c: signatureStart })] = {
-        f: "'REFERENSI'!$B$5"
-      };
-
-      applyNominativeStyle(ws, aoa.length, width, records.length);
-      ws['!rows'] = [];
-      [records.length + 8, records.length + 9, records.length + 10].forEach(rowIndex => {
-        ws['!rows'][rowIndex] = { hpt: 22 };
-      });
-      ws['!cols'] = makeCols(hasVolumeUnit ? [8, 32, 58, 18, 18, 20, 13] : [8, 32, 58, 18, 18]);
-      XLSX.utils.book_append_sheet(wb, ws, uniqueSheetName(wb, `${short} ${title}`));
-    }
-
-    function addUnclassifiedSheet(wb, processed) {
-      const aoa = [
-        ['TIDAK TERKLASIFIKASI'],
-        ['Jenis permohonan pada sheet ini belum cocok dengan mapping MAK.'],
-        [],
-        ['No.', 'NAMA PEMOHON', 'JENIS PERMOHONAN', 'BULAN', 'NOMOR BERKAS', 'STATUS BERKAS'],
-        ...processed.unclassified.map((row, index) => [index + 1, row.applicant, row.jenis, formatMonthKey(row.monthKey), row.nomorBerkas, row.rawStatus])
-      ];
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      mergeRow(ws, 0, 6);
-      mergeRow(ws, 1, 6);
-      applyNominativeStyle(ws, aoa.length, 6, processed.unclassified.length, 3);
-      ws['!cols'] = makeCols([8, 32, 58, 18, 18, 24]);
-      XLSX.utils.book_append_sheet(wb, ws, 'TIDAK TERKLASIFIKASI');
     }
 
     function mergeRow(ws, rowIndex, colCount) {
@@ -3320,47 +3230,6 @@
         }
       }
       ws['!freeze'] = { xSplit: 0, ySplit: 1 };
-    }
-
-    function applyCoverStyle(ws, rowCount) {
-      for (let r = 0; r < rowCount; r++) {
-        for (let c = 0; c < 2; c++) {
-          const cell = ws[XLSX.utils.encode_cell({ r, c })];
-          if (!cell) continue;
-          cell.s = baseCellStyle();
-          if (r < 3) {
-            cell.s.font = { bold: true, sz: r === 0 ? 14 : 12 };
-            cell.s.alignment.horizontal = 'center';
-            cell.s.border = {};
-          }
-          if (r === 4) cell.s = headerStyle();
-          if (String(cell.v).toUpperCase() === 'TOTAL') cell.s = totalStyle();
-        }
-      }
-    }
-
-    function applyNominativeStyle(ws, rowCount, colCount, recordCount, headerRow = 4) {
-      for (let r = 0; r < rowCount; r++) {
-        for (let c = 0; c < colCount; c++) {
-          const cell = ws[XLSX.utils.encode_cell({ r, c })];
-          if (!cell) continue;
-          cell.s = baseCellStyle();
-          if (r < 3) {
-            cell.s.font = { bold: true, sz: r === 0 ? 14 : 12 };
-            cell.s.alignment.horizontal = 'center';
-            cell.s.border = {};
-          }
-          if (r === headerRow) cell.s = headerStyle();
-          if (r > headerRow && r <= headerRow + recordCount) {
-            if (c === 0 || c >= 3) cell.s.alignment.horizontal = 'center';
-          }
-          if (r > headerRow + recordCount + 1) {
-            cell.s.alignment.horizontal = 'center';
-            cell.s.alignment.vertical = 'center';
-            cell.s.border = {};
-          }
-        }
-      }
     }
 
     function baseCellStyle() {
@@ -3392,30 +3261,579 @@
       return style;
     }
 
-    function uniqueSheetName(wb, rawName) {
-      const cleaned = cleanSheetName(rawName);
-      let name = cleaned;
-      let index = 2;
-      while (wb.SheetNames.includes(name)) {
-        const suffix = ` ${index}`;
-        name = cleaned.slice(0, 31 - suffix.length) + suffix;
-        index++;
-      }
-      return name;
-    }
-
     function cleanSheetName(value) {
       return cleanText(value).replace(/[\[\]\*\/\\\?\:]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 31) || 'Sheet';
     }
 
+    /* =====================================================================
+     * CETAK & DOWNLOAD NOMINATIF — FORMAT SKPT
+     * - Tanpa cover dan sheet rekap: rekap sub layanan ditulis di judul.
+     * - Satu sheet per layanan (MAK), ditambah sheet REFERENSI penanda tangan.
+     * - Excel: judul + header dibekukan (freeze), header tabel diulang tiap
+     *   halaman (print titles), dan seluruh kolom dimuat selebar kertas
+     *   (fit to 1 page wide).
+     * - Web: preview cetak dengan header tabel yang tetap terlihat, header
+     *   berulang di setiap halaman cetak, dan pilihan kolom.
+     * ===================================================================== */
+    function defaultPrintSettings() {
+      return {
+        columns: {},
+        paper: 'A4',
+        orientation: 'portrait',
+        excluded: [],
+        signer: { jabatan: '', nama: '', nip: '' }
+      };
+    }
+
+    function loadPrintSettings() {
+      const defaults = defaultPrintSettings();
+      try {
+        const saved = JSON.parse(localStorage.getItem(PRINT_SETTINGS_KEY) || '{}') || {};
+        return {
+          ...defaults,
+          ...saved,
+          columns: { ...(saved.columns || {}) },
+          excluded: Array.isArray(saved.excluded) ? saved.excluded : [],
+          signer: { ...defaults.signer, ...(saved.signer || {}) },
+          paper: PAPER_SIZES[saved.paper] ? saved.paper : defaults.paper,
+          orientation: saved.orientation === 'landscape' ? 'landscape' : 'portrait'
+        };
+      } catch (error) {
+        return defaults;
+      }
+    }
+
+    function savePrintSettings() {
+      try {
+        localStorage.setItem(PRINT_SETTINGS_KEY, JSON.stringify(appState.printSettings));
+      } catch (error) {
+        console.warn('Pengaturan cetak tidak dapat disimpan.', error);
+      }
+    }
+
+    function formatDateId(date) {
+      if (!(date instanceof Date) || isNaN(date)) return '';
+      return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+    }
+
+    // Kolom tambahan dari file sumber (mis. Alamat, Desa, Kecamatan, NTPN).
+    // Kolom yang sudah terwakili (nama, jenis, status) tidak diulang.
+    function sourceExtraColumns() {
+      const sample = appState.allRecords[0];
+      const headers = sample && Array.isArray(sample.rawHeaders) ? sample.rawHeaders : [];
+      const mapped = appState.sourceColumns || {};
+      const skip = new Set([mapped.applicant, mapped.type, mapped.status, mapped.date].filter(index => index >= 0));
+      const baseLabels = new Set(BASE_PRINT_COLUMNS.map(col => normalizeKey(col.label)));
+      return headers
+        .map((header, index) => ({ header: cleanText(header), index }))
+        .filter(item => item.header && !/^Kolom\s+\d+$/i.test(item.header) && !skip.has(item.index) && !baseLabels.has(normalizeKey(item.header)) && !/^no\.?$/i.test(item.header))
+        .map(item => ({
+          key: `raw:${normalizeKey(item.header)}`,
+          label: item.header,
+          width: Math.min(30, Math.max(12, item.header.length + 4)),
+          defaultOn: false,
+          source: true,
+          value: row => {
+            const value = row.rawRow ? row.rawRow[item.index] : '';
+            return value instanceof Date ? formatDateId(value) : (value ?? '');
+          }
+        }));
+    }
+
+    function printColumnCatalog() {
+      const extras = sourceExtraColumns();
+      const statusIndex = BASE_PRINT_COLUMNS.findIndex(col => col.key === 'status');
+      return [...BASE_PRINT_COLUMNS.slice(0, statusIndex), ...extras, ...BASE_PRINT_COLUMNS.slice(statusIndex)];
+    }
+
+    function isPrintColumnOn(col) {
+      const value = appState.printSettings.columns[col.key];
+      return value === undefined ? col.defaultOn : Boolean(value);
+    }
+
+    function sectionColumns(section, catalog = printColumnCatalog()) {
+      const columns = catalog.filter(col => isPrintColumnOn(col) && (!col.pemecahanOnly || section.isPemecahan));
+      return columns.length ? columns : catalog.filter(col => col.key === 'applicant');
+    }
+
+    function buildNominatifSections(processed) {
+      const sections = [];
+      MAK_DEFINITIONS.forEach(def => {
+        const group = processed.currentYearSummary.byMak.get(def.code);
+        if (!group || !group.count) return;
+        const order = name => {
+          const index = def.subservices.indexOf(name);
+          return index < 0 ? 999 : index;
+        };
+        const subs = Array.from(group.sub.values())
+          .filter(sub => sub.count)
+          .sort((a, b) => order(a.name) - order(b.name) || a.name.localeCompare(b.name, 'id'))
+          .map(sub => {
+            const split = sub.records.filter(isPemecahanRow);
+            return { name: sub.name, count: sub.count, bidang: split.length ? sumBidang(split) : null };
+          });
+        sections.push({
+          id: def.code,
+          code: def.code,
+          short: def.short,
+          name: def.name,
+          records: sortDetailRecords(group.records),
+          subs,
+          isPemecahan: def.code === '7971.BAH.004',
+          custom: false
+        });
+      });
+      processed.summary.customByMak.forEach(group => {
+        if (!group.count) return;
+        sections.push({
+          id: `custom:${group.code}`,
+          code: group.code,
+          short: cleanText(group.code).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(-8) || 'CUSTOM',
+          name: group.name,
+          records: sortDetailRecords(group.records),
+          subs: [],
+          isPemecahan: false,
+          custom: true
+        });
+      });
+      return sections;
+    }
+
+    function selectedNominatifSections({ customOnly = false } = {}) {
+      const excluded = new Set(appState.printSettings.excluded);
+      return (appState.nominatifSections || [])
+        .filter(section => !customOnly || section.custom)
+        .filter(section => !excluded.has(section.id));
+    }
+
+    function monthRangeLabel(records) {
+      const keys = [...new Set(records.map(row => row.monthKey).filter(key => /^\d{4}-\d{2}$/.test(key || '')))].sort();
+      if (!keys.length) return 'BULAN ........';
+      const monthName = key => MONTHS[Number(key.slice(5, 7)) - 1];
+      const first = keys[0];
+      const last = keys[keys.length - 1];
+      if (first === last) return `BULAN ${monthName(first)} ${first.slice(0, 4)}`;
+      if (first.slice(0, 4) === last.slice(0, 4)) return `BULAN ${monthName(first)} - ${monthName(last)} ${last.slice(0, 4)}`;
+      return `BULAN ${monthName(first)} ${first.slice(0, 4)} - ${monthName(last)} ${last.slice(0, 4)}`;
+    }
+
+    // Baris judul seperti SKPT: nama layanan, rentang bulan, total berkas,
+    // lalu rekap tiap sub layanan (bila lebih dari satu).
+    function sectionTitleLines(section) {
+      const lines = [
+        { text: `DAFTAR NOMINATIF ${section.name.toUpperCase()}`, size: 14, bold: true },
+        { text: monthRangeLabel(section.records), size: 12, bold: true },
+        { text: `TOTAL ${section.records.length} BERKAS`, size: 12, bold: true }
+      ];
+      if (section.isPemecahan) {
+        const split = section.records.filter(isPemecahanRow);
+        if (split.length) {
+          const unchecked = split.filter(row => row.jumlahBidang == null).length;
+          const note = unchecked ? ` — ${unchecked} berkas Pemecahan Bidang belum dicek jumlah bidangnya` : '';
+          lines.push({ text: `(${sumBidang(split)} BIDANG${note})`, size: 11, bold: true });
+        }
+      }
+      if (section.subs.length > 1) {
+        const parts = section.subs.map(sub => `${sub.name}: ${sub.count} Berkas${sub.bidang != null ? ` / ${sub.bidang} Bidang` : ''}`);
+        lines.push({ text: `(${parts.join('  |  ')})`, size: 10, bold: false, wrap: true });
+      }
+      return lines;
+    }
+
+    function sectionSheetName(section, used) {
+      const label = NOMINATIF_SHEET_LABELS[section.code] || section.short || section.name;
+      const base = cleanSheetName(`NOMINATIF ${label}`.toUpperCase());
+      let name = base;
+      let index = 2;
+      while (used.has(name.toLowerCase())) {
+        const suffix = ` ${index++}`;
+        name = base.slice(0, 31 - suffix.length) + suffix;
+      }
+      used.add(name.toLowerCase());
+      return name;
+    }
+
+    /* ---------- Excel (ExcelJS) ---------- */
+    let excelJsPromise = null;
+    function ensureExcelJS() {
+      if (window.ExcelJS) return Promise.resolve(window.ExcelJS);
+      if (excelJsPromise) return excelJsPromise;
+      const load = url => new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.async = true;
+        script.onload = () => (window.ExcelJS ? resolve(window.ExcelJS) : reject(new Error('ExcelJS tidak tersedia')));
+        script.onerror = () => {
+          script.remove();
+          reject(new Error(`Gagal memuat ${url}`));
+        };
+        document.head.appendChild(script);
+      });
+      excelJsPromise = EXCELJS_URLS.reduce((chain, url) => chain.catch(() => load(url)), Promise.reject(new Error('start')))
+        .catch(error => {
+          excelJsPromise = null;
+          throw new Error('Pustaka Excel gagal dimuat. Periksa koneksi internet lalu coba lagi.');
+        });
+      return excelJsPromise;
+    }
+
+    function excelColumnLetter(index) {
+      let n = index;
+      let letters = '';
+      while (n > 0) {
+        const mod = (n - 1) % 26;
+        letters = String.fromCharCode(65 + mod) + letters;
+        n = Math.floor((n - 1) / 26);
+      }
+      return letters;
+    }
+
+    function addSkptSheet(wb, section, used, settings, paper) {
+      const columns = sectionColumns(section);
+      const colCount = columns.length;
+      const titles = sectionTitleLines(section);
+      const headerRow = titles.length + 2;
+      const lastCol = excelColumnLetter(colCount);
+      const ws = wb.addWorksheet(sectionSheetName(section, used), {
+        views: [{ state: 'frozen', xSplit: 0, ySplit: headerRow, topLeftCell: `A${headerRow + 1}`, activeCell: `A${headerRow + 1}` }],
+        pageSetup: {
+          paperSize: paper.excel,
+          orientation: settings.orientation,
+          fitToPage: true,
+          fitToWidth: 1,
+          fitToHeight: 0,
+          horizontalCentered: true,
+          margins: { left: 0.4, right: 0.4, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3 }
+        },
+        headerFooter: { oddFooter: '&L&"Arial"&8&A&R&"Arial"&8Halaman &P dari &N' }
+      });
+      ws.columns = columns.map(col => ({ width: col.width }));
+      const totalWidth = columns.reduce((sum, col) => sum + col.width, 0);
+
+      titles.forEach((line, index) => {
+        const rowNumber = index + 1;
+        if (colCount > 1) ws.mergeCells(rowNumber, 1, rowNumber, colCount);
+        const cell = ws.getCell(rowNumber, 1);
+        cell.value = line.text;
+        cell.font = { name: 'Arial', size: line.size, bold: line.bold };
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        const estimatedLines = Math.max(1, Math.ceil((line.text.length * (line.size / 10) * 1.1) / totalWidth));
+        ws.getRow(rowNumber).height = Math.max(line.size + 6, estimatedLines * (line.size + 3) + 4);
+      });
+
+      const header = ws.getRow(headerRow);
+      columns.forEach((col, index) => {
+        const cell = header.getCell(index + 1);
+        cell.value = col.label;
+        cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: `FF${HEADER_FILL}` } };
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        cell.border = THIN_BORDER;
+      });
+      header.height = columns.some(col => col.label.length > col.width) ? 30 : 22;
+
+      section.records.forEach((record, recordIndex) => {
+        const row = ws.getRow(headerRow + 1 + recordIndex);
+        columns.forEach((col, index) => {
+          const cell = row.getCell(index + 1);
+          const value = col.value(record, recordIndex);
+          cell.value = value === null || value === undefined ? '' : value;
+          cell.font = { name: 'Arial', size: 10 };
+          cell.alignment = { horizontal: col.align || 'left', vertical: 'middle', wrapText: true };
+          cell.border = THIN_BORDER;
+        });
+      });
+
+      const dataEnd = headerRow + section.records.length;
+      const sigStart = colCount > 2 ? Math.floor(colCount / 2) + 1 : 1;
+      const signer = settings.signer || {};
+      const sigRows = [
+        { offset: 2, value: 'Mengetahui,' },
+        { offset: 3, value: { formula: "REFERENSI!$B$6", result: signer.jabatan || '' } },
+        { offset: 7, value: { formula: "REFERENSI!$B$4", result: signer.nama || '' }, bold: true, underline: true },
+        { offset: 8, value: { formula: '"NIP. "&REFERENSI!$B$5', result: `NIP. ${signer.nip || ''}` } }
+      ];
+      sigRows.forEach(item => {
+        const rowNumber = dataEnd + item.offset;
+        if (colCount > sigStart) ws.mergeCells(rowNumber, sigStart, rowNumber, colCount);
+        const cell = ws.getCell(rowNumber, sigStart);
+        cell.value = item.value;
+        cell.font = { name: 'Arial', size: 10, bold: Boolean(item.bold), underline: Boolean(item.underline) };
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      });
+      [4, 5, 6].forEach(offset => { ws.getRow(dataEnd + offset).height = 18; });
+      const lastRow = dataEnd + 8;
+      ws.pageSetup.printArea = `A1:${lastCol}${lastRow}`;
+      ws.pageSetup.printTitlesRow = `${headerRow}:${headerRow}`;
+      return ws;
+    }
+
+    function addSignerSheet(wb, signer) {
+      const ws = wb.addWorksheet('REFERENSI', {
+        pageSetup: { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
+      });
+      ws.columns = [{ width: 30 }, { width: 58 }];
+      ws.mergeCells('A1:B1');
+      ws.mergeCells('A2:B2');
+      ws.getCell('A1').value = 'REFERENSI DATA PENANDA TANGAN';
+      ws.getCell('A1').font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF12345A' } };
+      ws.getCell('A1').alignment = { horizontal: 'center' };
+      ws.getCell('A2').value = 'Ubah kolom B di bawah ini. Tanda tangan pada seluruh sheet nominatif mengambil data dari sini.';
+      ws.getCell('A2').font = { name: 'Arial', size: 10, italic: true, color: { argb: 'FF5D7690' } };
+      ws.getCell('A2').alignment = { horizontal: 'center', wrapText: true };
+      [
+        ['Nama Penanda Tangan', signer.nama || ''],
+        ['NIP Penanda Tangan', signer.nip || ''],
+        ['Jabatan Penanda Tangan', signer.jabatan || '']
+      ].forEach((pair, index) => {
+        const row = ws.getRow(4 + index);
+        row.getCell(1).value = pair[0];
+        row.getCell(2).value = pair[1];
+        row.getCell(1).font = { name: 'Arial', size: 10, bold: true };
+        row.getCell(2).font = { name: 'Arial', size: 10 };
+        row.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDDEBFA' } };
+        row.getCell(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF7D6' } };
+        row.getCell(2).numFmt = '@';
+        row.getCell(1).border = THIN_BORDER;
+        row.getCell(2).border = THIN_BORDER;
+      });
+
+      // Contoh blok tanda tangan seperti pada file SKPT.
+      const sample = [
+        [9, 'Mengetahui,'],
+        [10, { formula: '$B$6', result: signer.jabatan || '' }],
+        [14, { formula: '$B$4', result: signer.nama || '' }],
+        [15, { formula: '"NIP. "&$B$5', result: `NIP. ${signer.nip || ''}` }]
+      ];
+      sample.forEach(([rowNumber, value], index) => {
+        const cell = ws.getCell(rowNumber, 2);
+        cell.value = value;
+        cell.font = { name: 'Arial', size: 10, bold: index === 2, underline: index === 2 };
+        cell.alignment = { horizontal: 'center' };
+      });
+      return ws;
+    }
+
+    async function buildNominatifExcel(sections) {
+      const ExcelJS = await ensureExcelJS();
+      const settings = appState.printSettings;
+      const paper = PAPER_SIZES[settings.paper] || PAPER_SIZES.A4;
+      const wb = new ExcelJS.Workbook();
+      wb.creator = 'SI RENO';
+      wb.created = new Date();
+      wb.calcProperties.fullCalcOnLoad = true;
+      const used = new Set(['referensi']);
+      sections.forEach(section => addSkptSheet(wb, section, used, settings, paper));
+      addSignerSheet(wb, settings.signer || {});
+      return wb;
+    }
+
+    function saveBlobAs(blob, fileName) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }
+
+    async function downloadNominatifExcel({ customOnly = false, button = null } = {}) {
+      const sections = selectedNominatifSections({ customOnly });
+      if (!sections.length) {
+        showToast('Tidak ada data', customOnly ? 'Belum ada data MAK Custom yang dipilih.' : 'Pilih minimal satu layanan untuk diunduh.', 'error');
+        return;
+      }
+      const originalText = button ? button.textContent : '';
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Menyiapkan Excel...';
+      }
+      try {
+        const wb = await buildNominatifExcel(sections);
+        const buffer = await wb.xlsx.writeBuffer();
+        const fileName = customOnly ? appState.customFileName : appState.outputFileName;
+        saveBlobAs(new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), fileName);
+      } catch (error) {
+        console.error(error);
+        showToast('Download gagal', error.message || 'File Excel tidak dapat dibuat.', 'error');
+      } finally {
+        if (button) {
+          button.disabled = false;
+          button.textContent = originalText;
+        }
+      }
+    }
+
     function downloadWorkbook() {
-      if (!appState.outputWorkbook) return;
-      XLSX.writeFile(appState.outputWorkbook, appState.outputFileName, { compression: true });
+      return downloadNominatifExcel({ button: els.downloadBtn });
     }
 
     function downloadCustomWorkbook() {
-      if (!appState.customWorkbook || !appState.processed || !appState.processed.customRecords.length) return;
-      XLSX.writeFile(appState.customWorkbook, appState.customFileName, { compression: true });
+      if (!appState.processed || !appState.processed.customRecords.length) return;
+      return downloadNominatifExcel({ customOnly: true, button: els.downloadCustomBtn });
+    }
+
+    /* ---------- Preview & cetak dari web ---------- */
+    function paperDimensions() {
+      const paper = PAPER_SIZES[appState.printSettings.paper] || PAPER_SIZES.A4;
+      const landscape = appState.printSettings.orientation === 'landscape';
+      return { paper, width: landscape ? paper.h : paper.w, height: landscape ? paper.w : paper.h };
+    }
+
+    function renderPrintSectionHtml(section, catalog) {
+      const columns = sectionColumns(section, catalog);
+      const titles = sectionTitleLines(section);
+      const signer = appState.printSettings.signer || {};
+      const head = columns.map(col => `<th>${escapeHtml(col.label)}</th>`).join('');
+      const body = section.records.map((record, index) => `<tr>${columns.map(col => {
+        const value = col.value(record, index);
+        return `<td class="${col.align === 'center' ? 'c' : ''}">${escapeHtml(value === null || value === undefined ? '' : value)}</td>`;
+      }).join('')}</tr>`).join('');
+      return `<section class="print-sheet" style="--print-font:10pt">
+        <div class="print-title">${titles.map((line, index) => `<div class="t${Math.min(index, 3)}${line.bold ? '' : ' normal'}">${escapeHtml(line.text)}</div>`).join('')}</div>
+        <table class="print-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
+        <div class="print-signature">
+          <div>Mengetahui,</div>
+          <div>${escapeHtml(signer.jabatan || '') || '&nbsp;'}</div>
+          <div class="space"></div>
+          <div class="name">${escapeHtml(signer.nama || '') || '&nbsp;'}</div>
+          <div>NIP. ${escapeHtml(signer.nip || '')}</div>
+        </div>
+      </section>`;
+    }
+
+    function renderPrintSettingsPanel() {
+      const settings = appState.printSettings;
+      const catalog = printColumnCatalog();
+      const groups = [
+        { title: 'Kolom utama', items: catalog.filter(col => !col.source && !col.pemecahanOnly) },
+        { title: 'Khusus Pemecahan SHAT', items: catalog.filter(col => col.pemecahanOnly) },
+        { title: 'Kolom tambahan dari file sumber', items: catalog.filter(col => col.source) }
+      ].filter(group => group.items.length);
+      els.printColumnOptions.innerHTML = groups.map(group => `
+        <div class="print-check-group"><span class="print-check-title">${escapeHtml(group.title)}</span>
+        ${group.items.map(col => `<label class="print-check"><input type="checkbox" data-print-col="${escapeHtml(col.key)}" ${isPrintColumnOn(col) ? 'checked' : ''}><span>${escapeHtml(col.label)}</span></label>`).join('')}
+        </div>`).join('');
+      const excluded = new Set(settings.excluded);
+      els.printServiceOptions.innerHTML = (appState.nominatifSections || []).map(section => `
+        <label class="print-check"><input type="checkbox" data-print-service="${escapeHtml(section.id)}" ${excluded.has(section.id) ? '' : 'checked'}>
+        <span>${escapeHtml(section.name)}${section.custom ? ' (MAK Custom)' : ''} <em>${section.records.length} berkas</em></span></label>`).join('') || '<p class="small">Belum ada data nominatif.</p>';
+      els.printPaper.value = settings.paper;
+      els.printModal.querySelectorAll('[name="printOrientation"]').forEach(input => { input.checked = input.value === settings.orientation; });
+      els.signerJabatan.value = settings.signer.jabatan || '';
+      els.signerNama.value = settings.signer.nama || '';
+      els.signerNip.value = settings.signer.nip || '';
+    }
+
+    function renderPrintPreview() {
+      const { width, height } = paperDimensions();
+      const catalog = printColumnCatalog();
+      const sections = selectedNominatifSections();
+      els.printPreview.style.setProperty('--paper-width', `${width}mm`);
+      els.printPreview.style.setProperty('--paper-margin', `${PRINT_MARGIN_MM}mm`);
+      els.printPreview.innerHTML = sections.length
+        ? sections.map(section => renderPrintSectionHtml(section, catalog)).join('')
+        : '<div class="print-empty">Pilih minimal satu layanan untuk dicetak.</div>';
+      els.printPreview.style.zoom = '';
+      fitPrintTables();
+      // Perkecil tampilan preview agar satu lebar kertas terlihat utuh di layar.
+      const scroller = els.printPreview.parentElement;
+      const firstSheet = els.printPreview.querySelector('.print-sheet');
+      if (scroller && firstSheet) {
+        const available = scroller.clientWidth - 44;
+        const zoom = Math.min(1, available / firstSheet.offsetWidth);
+        if (zoom < 1) els.printPreview.style.zoom = zoom.toFixed(3);
+      }
+      const totalRows = sections.reduce((sum, section) => sum + section.records.length, 0);
+      const paperLabel = (PAPER_SIZES[appState.printSettings.paper] || PAPER_SIZES.A4).label.split(' (')[0];
+      els.printModalInfo.textContent = `${sections.length} layanan · ${totalRows} berkas · ${paperLabel} ${appState.printSettings.orientation === 'landscape' ? 'Landscape' : 'Portrait'} · header tabel diulang di setiap halaman`;
+      els.printNowBtn.disabled = !sections.length;
+      els.printDownloadBtn.disabled = !sections.length;
+      els.printPageStyle.textContent = `@page { size: ${width}mm ${height}mm; margin: ${PRINT_MARGIN_MM}mm; }`;
+    }
+
+    // Seperti "Fit All Columns on One Page" di Excel: bila tabel lebih lebar
+    // dari kertas, ukuran huruf diperkecil sampai semua kolom muat.
+    function fitPrintTables() {
+      els.printPreview.querySelectorAll('.print-sheet').forEach(sheet => {
+        const table = sheet.querySelector('.print-table');
+        if (!table) return;
+        const available = sheet.clientWidth - parseFloat(getComputedStyle(sheet).paddingLeft) - parseFloat(getComputedStyle(sheet).paddingRight);
+        let font = 10;
+        for (let attempt = 0; attempt < 8; attempt++) {
+          const needed = table.offsetWidth;
+          if (needed <= available + 0.5 || font <= 6) break;
+          font = Math.max(6, Math.floor(font * (available / needed) * 10) / 10 - 0.1);
+          sheet.style.setProperty('--print-font', `${font}pt`);
+        }
+      });
+    }
+
+    function openPrintModal() {
+      if (!appState.nominatifSections || !appState.nominatifSections.length) return;
+      renderPrintSettingsPanel();
+      els.printModal.classList.remove('hidden');
+      renderPrintPreview();
+      document.body.classList.add('print-modal-open');
+    }
+
+    function closePrintModal() {
+      els.printModal.classList.add('hidden');
+      document.body.classList.remove('print-modal-open');
+    }
+
+    function printNominatif() {
+      renderPrintPreview();
+      els.printArea.innerHTML = els.printPreview.innerHTML;
+      document.body.classList.add('printing-nominatif');
+      const cleanup = () => {
+        document.body.classList.remove('printing-nominatif');
+        els.printArea.innerHTML = '';
+        window.removeEventListener('afterprint', cleanup);
+      };
+      window.addEventListener('afterprint', cleanup);
+      setTimeout(() => window.print(), 50);
+    }
+
+    let printPreviewTimer = null;
+    function schedulePrintPreview(delay = 250) {
+      clearTimeout(printPreviewTimer);
+      printPreviewTimer = setTimeout(renderPrintPreview, delay);
+    }
+
+    function handlePrintSettingChange(event) {
+      const target = event.target;
+      const settings = appState.printSettings;
+      if (target.matches('[data-print-col]')) {
+        settings.columns[target.dataset.printCol] = target.checked;
+      } else if (target.matches('[data-print-service]')) {
+        const excluded = new Set(settings.excluded);
+        if (target.checked) excluded.delete(target.dataset.printService);
+        else excluded.add(target.dataset.printService);
+        settings.excluded = Array.from(excluded);
+      } else if (target === els.printPaper) {
+        settings.paper = PAPER_SIZES[target.value] ? target.value : 'A4';
+      } else if (target.name === 'printOrientation') {
+        settings.orientation = target.value === 'landscape' ? 'landscape' : 'portrait';
+      } else if (target === els.signerJabatan || target === els.signerNama || target === els.signerNip) {
+        settings.signer = { jabatan: els.signerJabatan.value, nama: els.signerNama.value, nip: els.signerNip.value };
+        savePrintSettings();
+        schedulePrintPreview();
+        return;
+      } else {
+        return;
+      }
+      savePrintSettings();
+      schedulePrintPreview(0);
+    }
+
+    function resetPrintColumns() {
+      appState.printSettings.columns = {};
+      savePrintSettings();
+      renderPrintSettingsPanel();
+      renderPrintPreview();
     }
 
     function showMessage(text, type) {
