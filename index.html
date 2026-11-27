@@ -1210,7 +1210,6 @@
       { key: 'no', label: 'No.', width: 6, align: 'center', defaultOn: true, value: (row, index) => index + 1 },
       { key: 'applicant', label: 'Nama Pemohon', width: 32, defaultOn: true, value: row => row.applicant },
       { key: 'jenis', label: 'Jenis Layanan', width: 40, defaultOn: true, value: row => row.jenis },
-      { key: 'subservice', label: 'Sub Layanan', width: 30, defaultOn: false, value: row => detailSubservice(row) },
       { key: 'mak', label: 'Kode MAK', width: 15, align: 'center', defaultOn: false, value: row => row.code },
       { key: 'tanggal', label: 'Tanggal', width: 12, align: 'center', defaultOn: false, value: row => formatDateId(row.date) },
       { key: 'bulan', label: 'Bulan', width: 15, align: 'center', defaultOn: true, value: row => formatMonthKey(row.monthKey) },
